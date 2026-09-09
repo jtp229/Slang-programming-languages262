@@ -1,5 +1,6 @@
 package cse262.slang.Scanner;
-
+import java.util.List;
+import java.util.ArrayList;
 /**
  * Scanner is responsible for taking a string that is the source code of a
  * program, and transforming it into a stream of tokens.
@@ -22,12 +23,17 @@ package cse262.slang.Scanner;
 public class Scanner {
     /** The index of the first character of the in-progress token */
     private int start = 0;
+    private String source; // the source code to scan
+
+    private int current = 0; // index of current character in the source string
 
     /** Count the newlines we consume */
     private int current_line = 1;
 
     /** index in `source` where current line begins */
     private int line_start_char = 0;
+
+
 
     /**
      * Compute the column number where the current token starts
@@ -37,6 +43,26 @@ public class Scanner {
     private int col() {
         return start - line_start_char + 1;
     }
+    private boolean isAtEnd(String source) {
+        if (current >= source.length()) { //if current index is greater then or equal to length of string, were at the the end of the string
+            return true;
+        }
+        return false;
+    }
+    private char advance(String source) {
+        char c = source.charAt(current);  //save the current character
+        current++; //increment the index to move forward parsing
+        return c;
+    }
+
+    private char peek(String source) { //see next character without consuming it
+        if (isAtEnd(source)) {
+            return '\0'; //return null character if at the end of the string
+        }
+        return source.charAt(current); //return the current character
+    }
+
+
 
     /**
      * An exception to capture the situation where the scanner encounters an
@@ -69,6 +95,15 @@ public class Scanner {
      * @return The token stream
      */
     public TokenStream scanTokens(String source) throws ScanError {
+        this.source = source;
+        this.current = 0;
+        this.start = 0;
+        this.current_line = 1;
+        this.line_start_char = 0;
+
+        List<Tokens.Token> tokens = new ArrayList<>(); //create a new list of tokens to hold the scanned tokens
+
+
         throw new ScanError("scanTokens not implemented");
     }
 }
