@@ -62,6 +62,16 @@ public class Scanner {
         return source.charAt(current); //return the current character
     }
 
+      private void scanIdentifier(List<Tokens.Token> tokens) {
+        //keep moving as long as character is valid
+        while (!isAtEnd(source) && isIdentifierpart(peek(source))) {
+            advance(source);
+        }
+        String text = source.substring(start, current); //get the identifier text
+        tokens.add(classifyIdentifier(text, current_line, col()));
+
+    }
+
 
 
     /**
@@ -85,6 +95,67 @@ public class Scanner {
             col = col();
         }
     }
+    //method to post process identifiers
+    private Tokens.Token classifyIdentifier(String text, int line, int col){
+        switch(text){
+            case "and": return new Tokens.And(text, line, col);
+            case "begin": return new Tokens.Begin(text, line, col);
+            case "cond": return new Tokens.Cond(text, line, col);
+            case "define": return new Tokens.Define(text, line, col);
+            case "if": return new Tokens.If(text, line, col);
+            case "lambda": return new Tokens.Lambda(text, line, col);
+            case "or": return new Tokens.Or(text, line, col);
+            case "quote": return new Tokens.Quote(text, line, col);
+            case "set": return new Tokens.Set(text, line, col);
+            case "let": return new Tokens.Let(text, line, col);
+            case "apply": return new Tokens.Apply(text, line, col);
+            // If its one of these default to general identifier
+            default: return new Tokens.Identifier(text, line, col);
+    }
+}
+    private boolean isIdentifierpart(char c) {
+        return Character.isLetterOrDigit(c) || c == '-' || c == '_';
+    }
+  
+
+    private void scanToken(List<Tokens.Token> tokens) throws ScanError { //helper method to scan tokens
+        char c = advance(source);
+
+        switch(c) {
+            //single character tokens
+            case '(': 
+            tokens.add(new Tokens.LeftParen(source.substring(start, current), current_line, col()));
+            break;
+            case ')':
+            tokens.add(new Tokens.RightParen(source.substring(start, current), current_line, col()));
+            break;
+            case '\'':
+            tokens.add(new Tokens.Abbrev(source.substring(start, current), current_line, col()));
+            break;
+
+
+            //whitespace & new lines
+            case ' ':
+            case '\r':
+            case '\t': //we want to ignore whitespace
+                break;
+            case '\n':
+                current_line++;
+                line_start_char = current;  //reset line_start_char
+                break;
+            default:
+    if (isIdentifierpart(c)) {
+        scanIdentifier(tokens);
+    } else {
+        throw new ScanError("Unexpected character: " + c);
+    }
+    break;
+            
+
+        }
+
+
+    }
 
     /**
      * scanTokens works through the source and transforms it into a list of
@@ -103,7 +174,11 @@ public class Scanner {
 
         List<Tokens.Token> tokens = new ArrayList<>(); //create a new list of tokens to hold the scanned tokens
 
-
-        throw new ScanError("scanTokens not implemented");
-    }
-}
+        while (!isAtEnd(source)) {
+            start = current;
+            scanToken(tokens);
+        }
+        //add EOF
+        tokens.add(new Tokens.Eof("", current_line, col()));
+        return new TokenStream(tokens);
+}}
