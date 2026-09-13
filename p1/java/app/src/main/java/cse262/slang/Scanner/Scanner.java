@@ -97,7 +97,7 @@ public class Scanner {
     }
     //method to post process identifiers
     private Tokens.Token classifyIdentifier(String text, int line, int col){
-        switch(text){
+        switch(text){ //check if the identifier is a keyword in the diagram
             case "and": return new Tokens.And(text, line, col);
             case "begin": return new Tokens.Begin(text, line, col);
             case "cond": return new Tokens.Cond(text, line, col);
@@ -106,16 +106,57 @@ public class Scanner {
             case "lambda": return new Tokens.Lambda(text, line, col);
             case "or": return new Tokens.Or(text, line, col);
             case "quote": return new Tokens.Quote(text, line, col);
-            case "set": return new Tokens.Set(text, line, col);
+            case "set!": return new Tokens.Set(text, line, col);
             case "let": return new Tokens.Let(text, line, col);
             case "apply": return new Tokens.Apply(text, line, col);
-            // If its one of these default to general identifier
+            // If its not one of these default to general identifier
             default: return new Tokens.Identifier(text, line, col);
     }
 }
-    private boolean isIdentifierpart(char c) {
-        return Character.isLetterOrDigit(c) || c == '-' || c == '_';
+    private void scanNumber(List<Tokens.Token> tokens) {
+        boolean isDouble = false; //flag to check if the number is a double
+        while (!isAtEnd(source) && Character.isDigit(peek(source))) {
+            advance(source); //consume digit
     }
+    
+        if (!isAtEnd(source) && peek(source) == '.') { //check for decimal point         
+            while (!isAtEnd(source) && Character.isDigit(peek(source))) {
+                if (current + 1 <source.length() && Character.isDigit(peek(source))) {
+                    isDouble = true; //set flag to true if we see a decimal point
+                    advance(source); //consume '.'
+                while (!isAtEnd(source) && Character.isDigit(peek(source))) {
+                    advance(source); //consume digit
+                }
+            }
+            
+            }
+            String text = source.substring(start, current); //get the number text
+            if (isDouble) {
+    double val = Double.parseDouble(text); //parse the number as a double
+    tokens.add(new Tokens.Dbl(text, current_line, col(), val));
+} else {
+    int val = Integer.parseInt(text); //parse the number as an integer
+    tokens.add(new Tokens.Int(text, current_line, col(), val));
+}
+        }
+
+       
+    }
+    private boolean isIdentifierpart(char c) {
+        if (Character.isLetterOrDigit(c)) {
+        return true;
+    }
+    //cases for symbol characters
+    switch(c) {
+       case '!': case '$': case '%': case '&': 
+        case '*': case '/': case ':': case '<': 
+        case '=': case '>': case '?': case '~': 
+        case '_': case '^': case '-': case '+':
+            return true;
+        default:
+            return false;
+    }
+}
   
 
     private void scanToken(List<Tokens.Token> tokens) throws ScanError { //helper method to scan tokens
@@ -132,6 +173,14 @@ public class Scanner {
             case '\'':
             tokens.add(new Tokens.Abbrev(source.substring(start, current), current_line, col()));
             break;
+            case '+':
+            case '-':
+                if (Character.isDigit(peek(source))) {
+                    scanNumber(tokens); //if the next character is a digit, scan as a number
+                } else {
+                    scanIdentifier(tokens); //otherwise scan as identifier + or -
+                }
+                break;
 
 
             //whitespace & new lines
