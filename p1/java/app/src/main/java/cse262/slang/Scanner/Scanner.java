@@ -113,20 +113,23 @@ public class Scanner {
             default: return new Tokens.Identifier(text, line, col);
     }
 }
-    private void scanNumber(List<Tokens.Token> tokens) {
+    private void scanNumber(List<Tokens.Token> tokens) { //method for scanning integers and doubles
         boolean isDouble = false; //flag to check if the number is a double
+
         while (!isAtEnd(source) && Character.isDigit(peek(source))) {
             advance(source); //consume digit
     }
     
         if (!isAtEnd(source) && peek(source) == '.') { //check for decimal point         
-            while (!isAtEnd(source) && Character.isDigit(peek(source))) {
-                if (current + 1 <source.length() && Character.isDigit(peek(source))) {
+                if (current + 1 < source.length() && Character.isDigit(source.charAt(current + 1))) { //check if the next character is a digit
                     isDouble = true; //set flag to true if we see a decimal point
                     advance(source); //consume '.'
+
+                    //consume fractional digit
                 while (!isAtEnd(source) && Character.isDigit(peek(source))) {
                     advance(source); //consume digit
                 }
+
             }
             
             }
@@ -141,7 +144,105 @@ public class Scanner {
         }
 
        
+private void scanHash(List<Tokens.Token> tokens) throws ScanError { //method for scanning hash tokens
+    if (isAtEnd(source)) {
+        throw new ScanError("Unexpected end of input after #");
     }
+    char c = advance(source); //consume the character after the hash
+    String text = source.substring(start, current); //get the text of the token
+    switch (c) {
+        case 't':
+            tokens.add(new Tokens.Bool(text, current_line, col(), true));
+            break;
+        case 'f':
+            tokens.add(new Tokens.Bool(text, current_line, col(), false));
+            break;
+        case '(':
+            tokens.add(new Tokens.Vec(text, current_line, col()));
+            break;
+        case '\\':
+            if (isAtEnd(source)) {
+                throw new ScanError("Unexpected end of input after #\\");
+            }
+            //read ahead to see if we have a named character
+            int charStart = current;
+            while (!isAtEnd(source) && Character.isLetter(peek(source))) {
+                advance(source);
+            }
+            //if no letters consumed advance at least one character
+            if(current == charStart && !isAtEnd(source)) {
+                advance(source);
+            }
+            String charName = source.substring(charStart, current);
+            char parsedChar;
+            switch (charName) {
+                case "space": parsedChar = ' '; break;
+                case "newline": parsedChar = '\n'; break;
+                case "tab": parsedChar = '\t'; break;
+                default:
+                    if (charName.length() == 1) {
+                        parsedChar = charName.charAt(0);
+                    } else {
+                        throw new ScanError("invalid character name after #\\: " + charName);
+                    }
+                    break;
+            }
+            text = source.substring(start, current);
+            tokens.add(new Tokens.Char(text, current_line, col(), parsedChar));
+            break;
+        default:
+            throw new ScanError("invalid character after #: " + c);
+    }
+}
+private void scanString(List<Tokens.Token> tokens) throws ScanError { //method for scanning string tokens
+    while (!isAtEnd(source) && peek(source) != '"') {
+        if (peek(source) == '\n') {
+            current_line++; //increment line number if we see a newline
+            line_start_char = current; //reset line_start_char
+        }
+        //handle escape sequences
+        if (peek(source) == '\\'){
+            advance(source); //consume the backslash
+            if (isAtEnd(source)) {
+                throw new ScanError("undended escape sequence in string");
+            }
+
+        }
+        advance(source); 
+    }
+    if (isAtEnd(source)) {
+        throw new ScanError("unterminated string literal");
+    }
+    //consume closing quote
+    advance(source);
+    //full text w/ qoutes
+    String text = source.substring(start, current);
+
+    //string content 
+    StringBuilder valueBuilder = new StringBuilder();
+    for (int i = 1; i < current - 1; i++) { //skip the first and last quote
+        char c = source.charAt(i);
+        if (c == '\\' && i + 1 < current - 1) { //handle escape sequences
+            char next = source.charAt(i+1);
+            switch (next) {
+                case '"':  valueBuilder.append('"'); i++; break;
+                case '\\': valueBuilder.append('\\'); i++; break;
+                case 'n':  valueBuilder.append('\n'); i++; break;
+                case 't':  valueBuilder.append('\t'); i++; break;
+                case 'r':  valueBuilder.append('\r'); i++; break;
+                default:   valueBuilder.append(c); break;
+            }
+        } else {
+            valueBuilder.append(c);
+        }
+    }
+
+    tokens.add(new Tokens.Str(text, current_line, col(), valueBuilder.toString()));
+}
+    
+
+
+
     private boolean isIdentifierpart(char c) {
         if (Character.isLetterOrDigit(c)) {
         return true;
@@ -182,6 +283,22 @@ public class Scanner {
                 }
                 break;
 
+            case ';': //case for single line comments
+             while (!isAtEnd(source) && peek(source) != '\n') {
+            advance(source); //consume characters until we reach a newline
+        }
+        break;
+            case '"':
+                scanString(tokens); //scan string token
+                break;
+            case '#':
+                scanHash(tokens); //scan hash token
+                break;
+            case '.': //case for standalone dot as in not double or decimal point
+                tokens.add(new Tokens.Dot(source.substring(start, current), current_line, col()));
+                break;
+
+
 
             //whitespace & new lines
             case ' ':
@@ -193,7 +310,10 @@ public class Scanner {
                 line_start_char = current;  //reset line_start_char
                 break;
             default:
-    if (isIdentifierpart(c)) {
+    if (Character.isDigit(c)) { //check if the character is a digit
+        scanNumber(tokens);
+    } else
+    if (isIdentifierpart(c)) { //check if the character is a valid identifier part
         scanIdentifier(tokens);
     } else {
         throw new ScanError("Unexpected character: " + c);
