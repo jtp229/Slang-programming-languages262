@@ -1,3 +1,4 @@
+
 # We'll use this as a simple approximation of an enum for the different Token
 # types
 (
@@ -88,6 +89,45 @@ class Transition:
         self.consume = consume
         self.advance = advance
         self.maker = maker
+
+#SCANNER STATES
+
+#scanner states
+STATE_START = 0
+STATE_IDENTIFIER = 1
+STATE_NUMBER = 2
+STATE_STRING = 3
+STATE_COMMENT = 4
+STATE_HASH = 5
+STATE_DECIMAL = 6
+STATE_CHAR = 7
+STATE_PLUS = 8
+STATE_MINUS = 9
+STATE_DOT = 10
+STATE_STRING_ESCAPE = 11
+
+
+#define character sets for transitions
+DELIMITERS = set(" ()\";\r\n\t\0")
+DIGITS = set("0123456789")
+LETTERS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+SPECIAL_CHARS = set("!$%&*+-./:<=>?^_~")
+IDENTITY_CHARS = LETTERS | DIGITS | SPECIAL_CHARS
+
+
+#define maker functinos for transitions
+
+def make_identifier():
+
+def  make_int():
+
+def make_dbl():
+
+def make_str():
+
+def make_char():
+
+def make_simple():
 
 
 # All of the transitions in our scanner.  Order matters.
