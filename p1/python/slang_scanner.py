@@ -116,19 +116,68 @@ IDENTITY_CHARS = LETTERS | DIGITS | SPECIAL_CHARS
 
 
 #define maker functinos for transitions
+KEYWORDS = {
+    "and": TOK_AND,
+    "begin": TOK_BEGIN,
+    "cond": TOK_COND,
+    "define": TOK_DEFINE,
+    "if": TOK_IF,
+    "lambda": TOK_LAMBDA,
+    "or": TOK_OR,
+    "quote": TOK_QUOTE,
+    "set!": TOK_SET,
+    "let": TOK_LET,
+    "apply": TOK_APPLY,
+}
 
-def make_identifier():
+def make_identifier(text, line, col):
+    tok_type = KEYWORDS.get(text, TOK_IDENTIFIER)
+    return Token(text, line, col, tok_type, text)
 
-def  make_int():
+def  make_int(text, line, col):
+    return Token(text, line, col, TOK_INT, int(text))
 
-def make_dbl():
+def make_dbl(text, line, col):
+    return Token(text, line, col, TOK_DBL, float(text))
 
-def make_str():
 
-def make_char():
+def make_str(text, line, col):
+    #process eescapes inside string qoutes
+    raw = text[1:-1]  # Remove the surrounding quotes
+    res = [] #make a list to hold the processed characters
+    i = 0
+    while i < len(raw):
+        if raw[i] == '\\':
+            if i + 1 >= len(raw):
+                raise ScanError("Unterminated string escape") #when the string ends with a backslash, raise an error
+            nxt = raw[i + 1]
+            #cases for the different escape sequences
+            if nxt == 'n': res.append('\n')
+            elif nxt == 't': res.append('\t')
+            elif nxt == '"': res.append('"')
+            elif nxt == '\\': res.append('\\')
+            else:
+                raise ScanError(f"Invalid string escape \\{nxt}") #when the escape sequence is not recognized, raise an error
+            i += 2
+        else:
+            res.append(raw[i])
+            i += 1
+    return Token(text, line, col, TOK_STR, "".join(res))
 
-def make_simple():
 
+def make_char(text, line, col):
+    name = text[2:] #strip #\
+    #handle special cases for character names
+    if name == "space": val = ' '
+    elif name == "newline": val = '\n'
+    elif name == "tab": val = '\t'
+    elif len(name) == 1: val = name[0]
+    else: 
+        raise ScanError(f"Invalid character  name after #\\: {name}") #if the name is not recognized raise an error
+    return Token(text, line, col, TOK_CHAR, val)
+
+def make_simple(tok_type, val =None):  #function to make simple tokens like parens, dot, abbrev, etc.
+    return lambda text, line, col: Token(text, line, col, tok_type, val if val is not None else text))
 
 # All of the transitions in our scanner.  Order matters.
 transitions = []
