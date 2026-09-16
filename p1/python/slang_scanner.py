@@ -142,6 +142,7 @@ def make_dbl(text, line, col):
 
 
 def make_str(text, line, col):
+    #print(f"DEBUG make_str: text='{text}' len={len(text)}")
     #process eescapes inside string qoutes
     raw = text[1:-1]  # Remove the surrounding quotes
     res = [] #make a list to hold the processed characters
@@ -152,10 +153,9 @@ def make_str(text, line, col):
                 raise ScanError("Unterminated string escape") #when the string ends with a backslash, raise an error
             nxt = raw[i + 1]
             #cases for the different escape sequences
-            if nxt == 'n': res.append('\n')
-            elif nxt == 't': res.append('\t')
-            elif nxt == '"': res.append('"')
-            elif nxt == '\\': res.append('\\')
+            escapes = {'n': '\n', 't': '\t', '"': '"', '\\': '\\', "'": "'", 'a': '\a', 'b': '\b', 'r': '\r'}
+            if nxt in escapes:
+                res.append(escapes[nxt])
             else:
                 raise ScanError(f"Invalid string escape \\{nxt}") #when the escape sequence is not recognized, raise an error
             i += 2
@@ -171,20 +171,28 @@ def make_char(text, line, col):
     if name == "space": val = ' '
     elif name == "newline": val = '\n'
     elif name == "tab": val = '\t'
-    elif len(name) == 1: val = name[0]
+    elif name == "backspace": val = '\b'
+    elif name == "alarm": val = "\a"
+    elif name == "null": val = '\0'
+    elif len(name) == 1: val = name
     else: 
         raise ScanError(f"Invalid character  name after #\\: {name}") #if the name is not recognized raise an error
     return Token(text, line, col, TOK_CHAR, val)
 
-def make_simple(tok_type, val =None):  #function to make simple tokens like parens, dot, abbrev, etc.
-    return lambda text, line, col: Token(text, line, col, tok_type, val if val is not None else text)
+def make_simple(tok_type, val=None):  #function to make simple tokens like parens, dot, abbrev, etc.
+    return lambda text, line, col: Token(
+        text, line, col, tok_type, val if val is not None else text )
 
 # All of the transitions in our scanner.  Order matters.
 transitions = [
 #start with white space and comments
-    Transition(STATE_START, STATE_START, {' ', '\r', '\t', '\n'}, False, False, True, None),
+    Transition(STATE_START, STATE_START, {' ', '\r', '\t', "\n"}, False, False, True, None),
+
+#eof handling
+    Transition(STATE_START, STATE_START, {'\0'}, False, False, True, None),
+
     Transition(STATE_START, STATE_COMMENT, {';'}, False, False, True, None),
-    Transition(STATE_COMMENT, STATE_COMMENT, '\n', True, False, True, None), #need two transitions to handle comments, one to consume the comment and one to consume the newline
+    Transition(STATE_COMMENT, STATE_COMMENT,{'\n'}, True, False, True, None), #need two transitions to handle comments, one to consume the comment and one to consume the newline
     Transition(STATE_COMMENT, STATE_START, {'\n'}, False, False, True, None), # and one to transition back to start state after the comment is done
 
 
@@ -195,20 +203,24 @@ transitions = [
     Transition(STATE_START, STATE_START, {'\''}, False, True, True, make_simple(TOK_ABBREV)), #consume qoute and emit the '
 
     #  Plus and Minus
+    #  check IDENTITY_CHARS (excluding DIGITS) before falling back
     Transition(STATE_START, STATE_PLUS, {'+'}, False, True, True, None), #consume + and transistion to state plus
-    Transition(STATE_PLUS, STATE_NUMBER, DIGITS, False, True, True, None),
-    Transition(STATE_PLUS, STATE_START, DELIMITERS, False, False, False, make_identifier), #use make identifier
-    Transition(STATE_PLUS, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None), #if followed by +-, treat as multi character identifier
+    Transition(STATE_PLUS, STATE_NUMBER, DIGITS, False, True, True, None), #if followed by +-, treat as multi character identifier
+    Transition(STATE_PLUS, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None), #use make identifier
+    Transition(STATE_PLUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
+
 
     Transition(STATE_START, STATE_MINUS, {'-'}, False, True, True, None),
     Transition(STATE_MINUS, STATE_NUMBER, DIGITS, False, True, True, None), #same logic as +
+    Transition(STATE_MINUS, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None),
     Transition(STATE_MINUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
-    Transition(STATE_MINUS, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None),
 
     # Dot and Decimal numbers
     Transition(STATE_START, STATE_DOT, {'.'}, False, True, True, None), #consume . and see what follows
     Transition(STATE_DOT, STATE_DECIMAL, DIGITS, False, True, True, None), #scan floating point numbers
+    Transition(STATE_DOT, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None),
     Transition(STATE_DOT, STATE_START, DELIMITERS, False, False, False, make_simple(TOK_DOT)), #if followed by delimiter emit a dot token
+    
 
     # Numbers
     Transition(STATE_START, STATE_NUMBER, DIGITS, False, True, True, None),
@@ -225,25 +237,32 @@ transitions = [
 
     #  Strings
     Transition(STATE_START, STATE_STRING, {'"'}, False, True, True, None), #seeing opening " transitistions into state string
+
     Transition(STATE_STRING, STATE_STRING_ESCAPE, {'\\'}, False, True, True, None), #if we see / transistion to string escape
-    Transition(STATE_STRING_ESCAPE, STATE_STRING, set(), False, True, True, None),  # Catch-all after '\'
+    Transition(STATE_STRING_ESCAPE, STATE_STRING, {'n', 't', '"', '\\', '\''}, False, True, True, None),  # Catch-all after '\'
     Transition(STATE_STRING, STATE_START, {'"'}, False, True, True, make_str), # if we get a non escaped closing qoute execute makestr and return to start state
     Transition(STATE_STRING, STATE_STRING, {'"'}, True, True, True, None),  # Anything except '"'
 
     # Hash Tokens
     Transition(STATE_START, STATE_HASH, {'#'}, False, True, True, None), #move to state hash if we see #
-    Transition(STATE_HASH, STATE_START, {'t'}, False, True, True, make_simple(TOK_BOOL, True)), #emit boolean/vector and reset to state start
-    Transition(STATE_HASH, STATE_START, {'f'}, False, True, True, make_simple(TOK_BOOL, False)),
+    Transition(STATE_HASH, STATE_START, {'t'}, False, True, True, make_simple(TOK_BOOL, True)),
+    Transition(STATE_HASH, STATE_START, {'f'}, False, True, True, make_simple(TOK_BOOL, False)), #emit boolean/vector and reset to state start
+   
     Transition(STATE_HASH, STATE_START, {'('}, False, True, True, make_simple(TOK_VECTOR, "#(")),
+
     Transition(STATE_HASH, STATE_CHAR, {'\\'}, False, True, True, None), #if followed by \, enter state_char and emit tokchar with make char once a delimiter is seen
-    Transition(STATE_CHAR, STATE_CHAR, LETTERS, False, True, True, None),
+    Transition(STATE_CHAR, STATE_CHAR, IDENTITY_CHARS | {'(', ')', '"', '\''}, False, True, True, None),
     Transition(STATE_CHAR, STATE_START, DELIMITERS, False, False, False, make_char),
+
 ]
 
 
 
 
 def scan_tokens(source):
+    #print(f"DEBUG: source length={len(source)}")
+   # for i, c in enumerate(source):
+       # print(f"DEBUG: source[{i}] = '{c}' (ord={ord(c)})")
     """Work through `source` and transform it into a list of tokens.
 
     This will always put an EOF token at the end, unless there is an error.
@@ -267,14 +286,57 @@ def scan_tokens(source):
 
     start_line = 1
     start_col = 1
+    def col_at(pos): #convert a 0 index string into a column number based on current line
+        return pos - line_start_char + 1
+    try:
+     #loop through source character by character
+        while current <= len(source):
+            ch = source[current] if current < len(source) else '\0'
+            matched = False
 
-    #loop through source character by character
-    while current <= len:
-        ch = source[current] if current < len else '\0'
-        matched = false
+            for tr in transitions:
+                if tr.from_state != state: #if the from state does not match the active state, skip
+                 continue
+                if tr.peek_set is not None: #if tr.invert_peek is False it only atches if ch is in the peek set.  If its true it only matches if its NOT in the peek set.  Feels kinda backwards
+                    in_set = ch in tr.peek_set 
+                    if tr.invert_peek and in_set:
+                        continue
+                    if not tr.invert_peek and not in_set:
+                        continue
+                matched = True #if all satisfied, then it matches
+                #print(f"DEBUG: state={state}, ch='{ch}', matched transition to state {tr.to_state}, consume={tr.consume}, advance={tr.advance}, peek_set={tr.peek_set}, invert={tr.invert_peek}")
 
-        for tr in transitions:
+                if len(text) == 0 and tr.consume:
+                    start_line = line
+                    start_col = col_at(current)
+
+                if tr.consume: #if consume is true, add the character to text
+                    text += ch
+
+                if tr.advance:
+                    if ch == '\n': #update the line counter if we have '\n'
+                        line += 1
+                        line_start_char = current + 1
+                    current += 1
+
+                if tr.maker is not None:
+                    tok = tr.maker(text, start_line, start_col) #build a token if maker is present
+                    if tok:
+                        tokens.append(tok)
+                    text = "" #reset buffer for the next token
+
+                state = tr.to_state
+                break
+                
+            if not matched:
+                raise ScanError(f"unexpected character '{ch}'") #if we make it to this point ive forgotten a character or something
+
+        tokens.append(Token("", line, col_at(current), TOK_EOF, "")) #add EOF token to tokens
+        return tokens
+    except ScanError as err:
+        return [Token(str(err), line, col_at(current), TOK_ERROR, "")]
 
 
 
-    raise ScanError("scan_tokens not implemented")
+
+    
