@@ -177,10 +177,70 @@ def make_char(text, line, col):
     return Token(text, line, col, TOK_CHAR, val)
 
 def make_simple(tok_type, val =None):  #function to make simple tokens like parens, dot, abbrev, etc.
-    return lambda text, line, col: Token(text, line, col, tok_type, val if val is not None else text))
+    return lambda text, line, col: Token(text, line, col, tok_type, val if val is not None else text)
 
 # All of the transitions in our scanner.  Order matters.
-transitions = []
+transitions = [
+#start with white space and comments
+    Transition(STATE_START, STATE_START, {' ', '\r', '\t', '\n'}, False, False, True, None),
+    Transition(STATE_START, STATE_COMMENT, {';'}, False, False, True, None),
+    Transition(STATE_COMMENT, STATE_COMMENT, '\n', True, False, True, None), #need two transitions to handle comments, one to consume the comment and one to consume the newline
+    Transition(STATE_COMMENT, STATE_START, {'\n'}, False, False, True, None), # and one to transition back to start state after the comment is done
+
+
+
+    # Single character delimiters and abbreviations
+    Transition(STATE_START, STATE_START, {'('}, False, True, True, make_simple(TOK_LEFT_PAREN)), #make a token for left paren
+    Transition(STATE_START, STATE_START, {')'}, False, True, True, make_simple(TOK_RIGHT_PAREN)), #make a right paren token
+    Transition(STATE_START, STATE_START, {'\''}, False, True, True, make_simple(TOK_ABBREV)), #consume qoute and emit the '
+
+    #  Plus and Minus
+    Transition(STATE_START, STATE_PLUS, {'+'}, False, True, True, None), #consume + and transistion to state plus
+    Transition(STATE_PLUS, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_PLUS, STATE_START, DELIMITERS, False, False, False, make_identifier), #use make identifier
+    Transition(STATE_PLUS, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None), #if followed by +-, treat as multi character identifier
+
+    Transition(STATE_START, STATE_MINUS, {'-'}, False, True, True, None),
+    Transition(STATE_MINUS, STATE_NUMBER, DIGITS, False, True, True, None), #same logic as +
+    Transition(STATE_MINUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
+    Transition(STATE_MINUS, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None),
+
+    # Dot and Decimal numbers
+    Transition(STATE_START, STATE_DOT, {'.'}, False, True, True, None), #consume . and see what follows
+    Transition(STATE_DOT, STATE_DECIMAL, DIGITS, False, True, True, None), #scan floating point numbers
+    Transition(STATE_DOT, STATE_START, DELIMITERS, False, False, False, make_simple(TOK_DOT)), #if followed by delimiter emit a dot token
+
+    # Numbers
+    Transition(STATE_START, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_NUMBER, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_NUMBER, STATE_DECIMAL, {'.'}, False, True, True, None), #if seeing . in state number, transistion to state decimal
+    Transition(STATE_DECIMAL, STATE_DECIMAL, DIGITS, False, True, True, None),
+    Transition(STATE_NUMBER, STATE_START, DELIMITERS, False, False, False, make_int), #if we see a delimiter, run make int or make dbl and return to state start
+    Transition(STATE_DECIMAL, STATE_START, DELIMITERS, False, False, False, make_dbl),
+
+    # Identifiers
+    Transition(STATE_START, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None), #check for identity char
+    Transition(STATE_IDENTIFIER, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None),
+    Transition(STATE_IDENTIFIER, STATE_START, DELIMITERS, False, False, False, make_identifier), #if we hit delimiter do make identifier then return to state start
+
+    #  Strings
+    Transition(STATE_START, STATE_STRING, {'"'}, False, True, True, None), #seeing opening " transitistions into state string
+    Transition(STATE_STRING, STATE_STRING_ESCAPE, {'\\'}, False, True, True, None), #if we see / transistion to string escape
+    Transition(STATE_STRING_ESCAPE, STATE_STRING, set(), False, True, True, None),  # Catch-all after '\'
+    Transition(STATE_STRING, STATE_START, {'"'}, False, True, True, make_str), # if we get a non escaped closing qoute execute makestr and return to start state
+    Transition(STATE_STRING, STATE_STRING, {'"'}, True, True, True, None),  # Anything except '"'
+
+    # Hash Tokens
+    Transition(STATE_START, STATE_HASH, {'#'}, False, True, True, None), #move to state hash if we see #
+    Transition(STATE_HASH, STATE_START, {'t'}, False, True, True, make_simple(TOK_BOOL, True)), #emit boolean/vector and reset to state start
+    Transition(STATE_HASH, STATE_START, {'f'}, False, True, True, make_simple(TOK_BOOL, False)),
+    Transition(STATE_HASH, STATE_START, {'('}, False, True, True, make_simple(TOK_VECTOR, "#(")),
+    Transition(STATE_HASH, STATE_CHAR, {'\\'}, False, True, True, None), #if followed by \, enter state_char and emit tokchar with make char once a delimiter is seen
+    Transition(STATE_CHAR, STATE_CHAR, LETTERS, False, True, True, None),
+    Transition(STATE_CHAR, STATE_START, DELIMITERS, False, False, False, make_char),
+]
+
+
 
 
 def scan_tokens(source):
@@ -195,5 +255,26 @@ def scan_tokens(source):
     Returns:
         A list of Tokens.
     """
+
+    #initialization
+
+    tokens = []
+    current = 0 
+    line = 1
+    line_start_char = 0
+    state = STATE_START
+    text = ""
+
+    start_line = 1
+    start_col = 1
+
+    #loop through source character by character
+    while current <= len:
+        ch = source[current] if current < len else '\0'
+        matched = false
+
+        for tr in transitions:
+
+
 
     raise ScanError("scan_tokens not implemented")
