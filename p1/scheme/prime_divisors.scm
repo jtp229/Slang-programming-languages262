@@ -16,5 +16,16 @@
 ;; other functions in the global namespace and use them from
 ;; `prime-divisors`.
 (define (prime-divisors n)
-  #f ;; [CSE 262] Implement Me!
-)
+  (define (helper n divisor)
+    (cond
+    ((= n 1) '())
+  ;; if n = 1 the original number has been factored all the way down, return empty list
+    ((> (* divisor divisor) n)(list n))
+  ;;if the divisor squared is bigger then n, n cant have any more divisors, so n is prime and can be returned
+    ((= (remainder n divisor) 0)
+    (cons divisor (helper (/ n divisor) divisor)))
+  ;;if the divisor devides evenly add the divisor to the result.  Recursively factor the qoutient w/ the same divisor
+    (else (helper n (+ divisor 1)))))
+  ;;if the divisor doesnt divide n, move to thenext one
+  (helper n 2));;begin by calling the input divided by 2 and recurse from there
+
