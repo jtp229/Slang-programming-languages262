@@ -10,5 +10,14 @@
 ;; local to `read-list`.
 
 (define (read-list)
-  #f ;; [CSE 262] Implement Me!
-)
+  (define (helper l)
+  ;; local helper function that takes a list
+    (let ((val (read)))
+    ;;read one value from the input
+      (if (eof-object? val)
+      ;;check if we hit eof, and if we did then return the list
+          l
+          (helper (cons val l)))))
+          ;;if not at eof, add the value to the front of the list and then recurse
+  (helper '()))
+  ;;start with an empty list
