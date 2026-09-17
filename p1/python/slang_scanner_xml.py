@@ -83,12 +83,12 @@ def to_xml_string(tokens):
             elif token.tok_type == TOK_IDENTIFIER:
                 elt.setAttribute("val", xml_escape(token.text))
             elif token.tok_type == TOK_BOOL:
-                elt.setAttribute("val", "true" if token.literal else "false")
+                elt.setAttribute("val", token.literal)
             elif token.tok_type in [TOK_DBL, TOK_INT]:
                 elt.setAttribute("val", str(token.literal))
         root.appendChild(elt)
         if token.tok_type == TOK_ERROR:
-            return token.literal
+            return token.text
 
     xml_str = root.toprettyxml(indent=" ")
     return xml_str.strip()

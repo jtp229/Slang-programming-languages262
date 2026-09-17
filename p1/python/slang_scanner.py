@@ -138,33 +138,36 @@ def  make_int(text, line, col):
     return Token(text, line, col, TOK_INT, int(text))
 
 def make_dbl(text, line, col):
+    if text.endswith('.'):  # Reject numbers ending with dot
+        raise ScanError(f"Invalid number: {text}")
     return Token(text, line, col, TOK_DBL, float(text))
 
 
 def make_str(text, line, col):
-    #print(f"DEBUG make_str: text='{text}' len={len(text)}")
+   # print(f"DEBUG make_str: text='{text}' len={len(text)}")
     #process eescapes inside string qoutes
     raw = text[1:-1]  # Remove the surrounding quotes
     res = [] #make a list to hold the processed characters
     i = 0
+    curr_line, curr_col = line, col + 1
     while i < len(raw):
         if raw[i] == '\\':
             if i + 1 >= len(raw):
-                raise ScanError("Unterminated string escape") #when the string ends with a backslash, raise an error
+                raise ScanError(f"Scan Error: line {curr_line}, col {curr_col}") #when the string ends with a backslash, raise an error
             nxt = raw[i + 1]
             #cases for the different escape sequences
             escapes = {'n': '\n', 't': '\t', '"': '"', '\\': '\\', "'": "'", 'a': '\a', 'b': '\b', 'r': '\r'}
             if nxt in escapes:
                 res.append(escapes[nxt])
             else:
-                raise ScanError(f"Invalid string escape \\{nxt}") #when the escape sequence is not recognized, raise an error
+                raise ScanError(f"Scan Error: line {curr_line}, col {curr_col}") #when the escape sequence is not recognized, raise an error
             i += 2
         else:
             res.append(raw[i])
             i += 1
     return Token(text, line, col, TOK_STR, "".join(res))
 
-
+"""
 def make_char(text, line, col):
     name = text[2:] #strip #\
     #handle special cases for character names
@@ -178,11 +181,30 @@ def make_char(text, line, col):
     else: 
         raise ScanError(f"Invalid character  name after #\\: {name}") #if the name is not recognized raise an error
     return Token(text, line, col, TOK_CHAR, val)
+"""
+def make_char(text, line, col):
+    name = text[2:]  # Strip #\
+    char_map = {
+        "space": ' ',
+        "newline": '\n',
+        "tab": '\t',
+        "backspace": '\b',
+        "alarm": '\a',
+        "null": '\0',
+    }
+    if name in char_map:
+        val = char_map[name]
+    elif len(name) == 1:
+        val = name
+    else:
+        # Report error at start of character name (col + 2)
+        raise ScanError(f"Scan Error: line {line}, col {col + 2}")
+    return Token(text, line, col, TOK_CHAR, val)
 
 def make_simple(tok_type, val=None):  #function to make simple tokens like parens, dot, abbrev, etc.
     return lambda text, line, col: Token(
         text, line, col, tok_type, val if val is not None else text )
-
+"""
 # All of the transitions in our scanner.  Order matters.
 transitions = [
 #start with white space and comments
@@ -201,25 +223,36 @@ transitions = [
     Transition(STATE_START, STATE_START, {'('}, False, True, True, make_simple(TOK_LEFT_PAREN)), #make a token for left paren
     Transition(STATE_START, STATE_START, {')'}, False, True, True, make_simple(TOK_RIGHT_PAREN)), #make a right paren token
     Transition(STATE_START, STATE_START, {'\''}, False, True, True, make_simple(TOK_ABBREV)), #consume qoute and emit the '
+    # Hash Tokens
+    Transition(STATE_START, STATE_HASH, {'#'}, False, True, True, None), #move to state hash if we see #
+    Transition(STATE_HASH, STATE_START, {'t'}, False, True, True, make_simple(TOK_BOOL, "true")),
+    Transition(STATE_HASH, STATE_START, {'f'}, False, True, True, make_simple(TOK_BOOL, "false")), #emit boolean/vector and reset to state start
+
+    Transition(STATE_HASH, STATE_START, {'('}, False, True, True, make_simple(TOK_VECTOR, "#(")),
+    Transition(STATE_HASH, STATE_CHAR, {'\\'}, False, True, True, None),
+    Transition(STATE_CHAR, STATE_CHAR, IDENTITY_CHARS | {'\\', '#', '(', ')', '"', '\''}, False, True, True, None),
+    Transition(STATE_CHAR, STATE_START, DELIMITERS, False, False, False, make_char),
+  
 
     #  Plus and Minus
     #  check IDENTITY_CHARS (excluding DIGITS) before falling back
     Transition(STATE_START, STATE_PLUS, {'+'}, False, True, True, None), #consume + and transistion to state plus
     Transition(STATE_PLUS, STATE_NUMBER, DIGITS, False, True, True, None), #if followed by +-, treat as multi character identifier
-    Transition(STATE_PLUS, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None), #use make identifier
+    Transition(STATE_PLUS, STATE_IDENTIFIER, SPECIAL_CHARS - {'+', '-'} , False, True, True, None), #use make identifier
     Transition(STATE_PLUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
 
 
     Transition(STATE_START, STATE_MINUS, {'-'}, False, True, True, None),
     Transition(STATE_MINUS, STATE_NUMBER, DIGITS, False, True, True, None), #same logic as +
-    Transition(STATE_MINUS, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None),
+    Transition(STATE_MINUS, STATE_IDENTIFIER, SPECIAL_CHARS - {'+', '-'}, False, True, True, None),
     Transition(STATE_MINUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
 
     # Dot and Decimal numbers
     Transition(STATE_START, STATE_DOT, {'.'}, False, True, True, None), #consume . and see what follows
-    Transition(STATE_DOT, STATE_DECIMAL, DIGITS, False, True, True, None), #scan floating point numbers
-    Transition(STATE_DOT, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None),
-    Transition(STATE_DOT, STATE_START, DELIMITERS, False, False, False, make_simple(TOK_DOT)), #if followed by delimiter emit a dot token
+    #Transition(STATE_DOT, STATE_DECIMAL, DIGITS, False, True, True, None), #scan floating point numbers
+    #Transition(STATE_DOT, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None),
+    Transition(STATE_DOT, STATE_START, DELIMITERS, False, False, False, make_simple(TOK_DOT)), 
+    #Transition(STATE_DOT, STATE_START, DELIMITERS, False, False, False, make_simple(TOK_DOT)), #if followed by delimiter emit a dot token
     
 
     # Numbers
@@ -230,30 +263,85 @@ transitions = [
     Transition(STATE_NUMBER, STATE_START, DELIMITERS, False, False, False, make_int), #if we see a delimiter, run make int or make dbl and return to state start
     Transition(STATE_DECIMAL, STATE_START, DELIMITERS, False, False, False, make_dbl),
 
+    
+
+    
+
+    #  Strings
+    Transition(STATE_START, STATE_STRING, {'"', '\0'}, False, True, True, None), #seeing opening " transitistions into state string
+
+    Transition(STATE_STRING, STATE_STRING_ESCAPE, {'\\'}, False, True, True, None), #if we see / transistion to string escape
+    Transition(STATE_STRING_ESCAPE, STATE_STRING, {'n', 't', '"', '\\', '\''}, False, True, True, None),  # Catch-all after '\'
+    Transition(STATE_STRING, STATE_START, {'"'}, False, True, True, make_str), # if we get a non escaped closing qoute execute makestr and return to start state
+    Transition(STATE_STRING, STATE_STRING, {'"', '\0'}, True, True, True, None),  # Anything except '"' and EOF
+   #Transition(STATE_STRING, STATE_STRING, {'"'}, True, True, True, None),  # Anything except '"'
     # Identifiers
     Transition(STATE_START, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None), #check for identity char
     Transition(STATE_IDENTIFIER, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None),
     Transition(STATE_IDENTIFIER, STATE_START, DELIMITERS, False, False, False, make_identifier), #if we hit delimiter do make identifier then return to state start
 
-    #  Strings
-    Transition(STATE_START, STATE_STRING, {'"'}, False, True, True, None), #seeing opening " transitistions into state string
+    
 
-    Transition(STATE_STRING, STATE_STRING_ESCAPE, {'\\'}, False, True, True, None), #if we see / transistion to string escape
-    Transition(STATE_STRING_ESCAPE, STATE_STRING, {'n', 't', '"', '\\', '\''}, False, True, True, None),  # Catch-all after '\'
-    Transition(STATE_STRING, STATE_START, {'"'}, False, True, True, make_str), # if we get a non escaped closing qoute execute makestr and return to start state
-    Transition(STATE_STRING, STATE_STRING, {'"'}, True, True, True, None),  # Anything except '"'
+]
+"""
+transitions = [
+    # Whitespace and comments
+    Transition(STATE_START, STATE_START, {' ', '\r', '\t', '\n'}, False, False, True, None),
+    Transition(STATE_START, STATE_START, {'\0'}, False, False, True, None),
+    Transition(STATE_START, STATE_COMMENT, {';'}, False, False, True, None),
+    Transition(STATE_COMMENT, STATE_COMMENT, {'\n'}, True, False, True, None),
+    Transition(STATE_COMMENT, STATE_START, {'\n'}, False, False, True, None),
+
+    # Delimiters and Abbreviations
+    Transition(STATE_START, STATE_START, {'('}, False, True, True, make_simple(TOK_LEFT_PAREN)),
+    Transition(STATE_START, STATE_START, {')'}, False, True, True, make_simple(TOK_RIGHT_PAREN)),
+    Transition(STATE_START, STATE_START, {'\''}, False, True, True, make_simple(TOK_ABBREV)),
 
     # Hash Tokens
-    Transition(STATE_START, STATE_HASH, {'#'}, False, True, True, None), #move to state hash if we see #
-    Transition(STATE_HASH, STATE_START, {'t'}, False, True, True, make_simple(TOK_BOOL, True)),
-    Transition(STATE_HASH, STATE_START, {'f'}, False, True, True, make_simple(TOK_BOOL, False)), #emit boolean/vector and reset to state start
-   
+    Transition(STATE_START, STATE_HASH, {'#'}, False, True, True, None),
+    Transition(STATE_HASH, STATE_START, {'t'}, False, True, True, make_simple(TOK_BOOL, "true")),
+    Transition(STATE_HASH, STATE_START, {'f'}, False, True, True, make_simple(TOK_BOOL, "false")),
     Transition(STATE_HASH, STATE_START, {'('}, False, True, True, make_simple(TOK_VECTOR, "#(")),
-
-    Transition(STATE_HASH, STATE_CHAR, {'\\'}, False, True, True, None), #if followed by \, enter state_char and emit tokchar with make char once a delimiter is seen
-    Transition(STATE_CHAR, STATE_CHAR, IDENTITY_CHARS | {'(', ')', '"', '\''}, False, True, True, None),
+    Transition(STATE_HASH, STATE_CHAR, {'\\'}, False, True, True, None),
+    Transition(STATE_CHAR, STATE_CHAR, IDENTITY_CHARS | {'\\', '#', '(', ')', '"', '\''}, False, True, True, None),
     Transition(STATE_CHAR, STATE_START, DELIMITERS, False, False, False, make_char),
 
+    # Plus and Minus
+    Transition(STATE_START, STATE_PLUS, {'+'}, False, True, True, None),
+    Transition(STATE_PLUS, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_PLUS, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS - {'+', '-'}, False, True, True, None),
+    Transition(STATE_PLUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
+
+    Transition(STATE_START, STATE_MINUS, {'-'}, False, True, True, None),
+    Transition(STATE_MINUS, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_MINUS, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS - {'+', '-'}, False, True, True, None),
+    Transition(STATE_MINUS, STATE_START, DELIMITERS, False, False, False, make_identifier),
+
+    # Dot and Decimal numbers
+    Transition(STATE_START, STATE_DOT, {'.'}, False, True, True, None),
+    Transition(STATE_DOT, STATE_DECIMAL, DIGITS, False, True, True, None),
+    Transition(STATE_DOT, STATE_IDENTIFIER, IDENTITY_CHARS - DIGITS, False, True, True, None),
+    Transition(STATE_DOT, STATE_START, DELIMITERS, False, False, False, make_simple(TOK_DOT)),
+
+    # Numbers
+    Transition(STATE_START, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_NUMBER, STATE_NUMBER, DIGITS, False, True, True, None),
+    Transition(STATE_NUMBER, STATE_DECIMAL, {'.'}, False, True, True, None),
+    Transition(STATE_DECIMAL, STATE_DECIMAL, DIGITS, False, True, True, None),
+    Transition(STATE_NUMBER, STATE_START, DELIMITERS, False, False, False, make_int),
+    Transition(STATE_DECIMAL, STATE_START, DELIMITERS, False, False, False, make_dbl),
+
+    # Strings
+    Transition(STATE_START, STATE_STRING, {'"'}, False, True, True, None),
+    Transition(STATE_STRING, STATE_STRING_ESCAPE, {'\\'}, False, True, True, None),
+    Transition(STATE_STRING_ESCAPE, STATE_STRING, {'n', 't', '"', '\\', '\'', 'a', 'b', 'r'}, False, True, True, None),
+    Transition(STATE_STRING, STATE_START, {'"'}, False, True, True, make_str),
+    Transition(STATE_STRING, STATE_STRING, {'"', '\0'}, True, True, True, None),
+
+    # Identifiers
+    Transition(STATE_START, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None),
+    Transition(STATE_IDENTIFIER, STATE_IDENTIFIER, IDENTITY_CHARS, False, True, True, None),
+    Transition(STATE_IDENTIFIER, STATE_START, DELIMITERS, False, False, False, make_identifier),
 ]
 
 
@@ -261,8 +349,8 @@ transitions = [
 
 def scan_tokens(source):
     #print(f"DEBUG: source length={len(source)}")
-   # for i, c in enumerate(source):
-       # print(f"DEBUG: source[{i}] = '{c}' (ord={ord(c)})")
+    #for i, c in enumerate(source):
+        #print(f"DEBUG: source[{i}] = '{c}' (ord={ord(c)})")
     """Work through `source` and transform it into a list of tokens.
 
     This will always put an EOF token at the end, unless there is an error.
@@ -304,7 +392,9 @@ def scan_tokens(source):
                     if not tr.invert_peek and not in_set:
                         continue
                 matched = True #if all satisfied, then it matches
-                #print(f"DEBUG: state={state}, ch='{ch}', matched transition to state {tr.to_state}, consume={tr.consume}, advance={tr.advance}, peek_set={tr.peek_set}, invert={tr.invert_peek}")
+                from_states = ['START', 'IDENTIFIER', 'NUMBER', 'STRING', 'COMMENT', 'HASH', 'DECIMAL', 'CHAR', 'PLUS', 'MINUS', 'DOT', 'STRING_ESCAPE']
+                to_states = from_states
+               # print(f"DEBUG MATCH: {from_states[tr.from_state]} -> {to_states[tr.to_state]}, ch='{ch}', peek={tr.peek_set}, invert={tr.invert_peek}")
 
                 if len(text) == 0 and tr.consume:
                     start_line = line
@@ -329,12 +419,17 @@ def scan_tokens(source):
                 break
                 
             if not matched:
-                raise ScanError(f"unexpected character '{ch}'") #if we make it to this point ive forgotten a character or something
+                raise ScanError(f"Scan Error: line {line}, col {col_at(current)}")
 
-        tokens.append(Token("", line, col_at(current), TOK_EOF, "")) #add EOF token to tokens
+        tokens.append(Token("", line, col_at(current), TOK_EOF, ""))
         return tokens
+   # Replace your exception handling at the bottom of scan_tokens:
     except ScanError as err:
-        return [Token(str(err), line, col_at(current), TOK_ERROR, "")]
+        msg = str(err)
+    # If the maker already formatted a full "Scan Error:" message, use it directly
+        if not msg.startswith("Scan Error:"):
+            msg = f"Scan Error: line {line}, col {col_at(current)}"
+        return [Token(msg, line, col_at(current), TOK_ERROR, "")]
 
 
 
