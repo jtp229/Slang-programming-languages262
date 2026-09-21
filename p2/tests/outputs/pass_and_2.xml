@@ -1,0 +1,9 @@
+<Ast xmlns="ast">
+ <And>
+  <Call>
+   <Identifier val="&gt;"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </And>
+</Ast>

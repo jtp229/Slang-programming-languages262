@@ -1,0 +1,21 @@
+<Ast xmlns="ast">
+ <Apply>
+  <Identifier val="+"/>
+  <Cons>
+   <Int val="1"/>
+   <Cons>
+    <Int val="2"/>
+    <Cons>
+     <Int val="3"/>
+     <Cons>
+      <Int val="4"/>
+      <Cons>
+       <Int val="5"/>
+       <Empty/>
+      </Cons>
+     </Cons>
+    </Cons>
+   </Cons>
+  </Cons>
+ </Apply>
+</Ast>

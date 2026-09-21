@@ -1,0 +1,16 @@
+<Ast xmlns="ast">
+ <If>
+  <Bool val="false"/>
+  <Call>
+   <Identifier val="+"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+  <Vector>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Vector>
+ </If>
+</Ast>

@@ -1,0 +1,7 @@
+<Tokens xmlns="tokens">
+ <LeftParenToken col="1" line="1"/>
+ <QuoteToken col="2" line="1"/>
+ <IntToken col="8" line="1" val="1"/>
+ <RightParenToken col="9" line="1"/>
+ <EofToken/>
+</Tokens>

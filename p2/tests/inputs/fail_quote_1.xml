@@ -1,0 +1,9 @@
+<Tokens xmlns="tokens">
+ <LeftParenToken col="1" line="1"/>
+ <QuoteToken col="2" line="1"/>
+ <AbbrevToken col="8" line="1"/>
+ <IdentifierToken col="9" line="1" val="a"/>
+ <AbbrevToken col="11" line="1"/>
+ <IdentifierToken col="12" line="1" val="b"/>
+ <EofToken/>
+</Tokens>

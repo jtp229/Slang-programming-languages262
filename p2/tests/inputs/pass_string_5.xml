@@ -1,0 +1,4 @@
+<Tokens xmlns="tokens">
+ <StrToken col="1" line="1" val="a very long string, but that shouldn\'t be a problem because strings are just strings and the length should never be an issue"/>
+ <EofToken/>
+</Tokens>

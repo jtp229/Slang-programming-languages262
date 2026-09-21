@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Apply>
+  <Bool val="true"/>
+  <Bool val="false"/>
+ </Apply>
+</Ast>

@@ -1,0 +1,16 @@
+<Ast xmlns="ast">
+ <Begin>
+  <Call>
+   <Identifier val="+"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Symbol val="a"/>
+  <Int val="9"/>
+  <Set>
+   <Identifier val="a"/>
+   <Identifier val="b"/>
+  </Set>
+  <Bool val="false"/>
+ </Begin>
+</Ast>

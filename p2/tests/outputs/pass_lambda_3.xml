@@ -1,0 +1,35 @@
+<Ast xmlns="ast">
+ <Lambda>
+  <Formals>
+   <Identifier val="x"/>
+  </Formals>
+  <Expressions>
+   <Begin>
+    <Call>
+     <Identifier val="x"/>
+     <Int val="78"/>
+    </Call>
+    <Call>
+     <Identifier val="/"/>
+     <Int val="7"/>
+     <Identifier val="y"/>
+    </Call>
+    <Call>
+     <Identifier val="+"/>
+     <Call>
+      <Identifier val="-"/>
+      <Int val="1"/>
+      <Int val="2"/>
+     </Call>
+     <Int val="3"/>
+    </Call>
+    <Call>
+     <Identifier val="+"/>
+     <Int val="1"/>
+     <Int val="2"/>
+    </Call>
+    <Int val="12"/>
+   </Begin>
+  </Expressions>
+ </Lambda>
+</Ast>

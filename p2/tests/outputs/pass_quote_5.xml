@@ -1,0 +1,5 @@
+<Ast xmlns="ast">
+ <Quote>
+  <Dbl val="1.1"/>
+ </Quote>
+</Ast>

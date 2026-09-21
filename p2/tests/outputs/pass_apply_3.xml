@@ -1,0 +1,24 @@
+<Ast xmlns="ast">
+ <Apply>
+  <Lambda>
+   <Formals>
+    <Identifier val="a"/>
+    <Identifier val="b"/>
+   </Formals>
+   <Expressions>
+    <Call>
+     <Identifier val="+"/>
+     <Identifier val="a"/>
+     <Identifier val="b"/>
+    </Call>
+   </Expressions>
+  </Lambda>
+  <Cons>
+   <Int val="1"/>
+   <Cons>
+    <Int val="2"/>
+    <Empty/>
+   </Cons>
+  </Cons>
+ </Apply>
+</Ast>

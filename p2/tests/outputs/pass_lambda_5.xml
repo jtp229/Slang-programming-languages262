@@ -1,0 +1,21 @@
+<Ast xmlns="ast">
+ <Lambda>
+  <Formals>
+   <Identifier val="x"/>
+  </Formals>
+  <Expressions>
+   <Lambda>
+    <Formals>
+     <Identifier val="y"/>
+    </Formals>
+    <Expressions>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="x"/>
+      <Identifier val="y"/>
+     </Call>
+    </Expressions>
+   </Lambda>
+  </Expressions>
+ </Lambda>
+</Ast>

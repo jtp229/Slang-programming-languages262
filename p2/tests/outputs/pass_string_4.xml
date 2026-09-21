@@ -1,0 +1,3 @@
+<Ast xmlns="ast">
+ <Str val="string with \\ &quot; \n \t escap\'\'ing"/>
+</Ast>

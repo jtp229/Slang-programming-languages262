@@ -1,0 +1,6 @@
+<Tokens xmlns="tokens">
+ <LeftParenToken col="1" line="1"/>
+ <LambdaToken col="2" line="1"/>
+ <RightParenToken col="8" line="1"/>
+ <EofToken/>
+</Tokens>

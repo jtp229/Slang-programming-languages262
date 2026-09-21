@@ -1,0 +1,32 @@
+plugins{
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+compileJava { 
+    options.debug = true
+    sourceCompatibility = JavaVersion.VERSION_21
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation 'org.json:json:20220924'
+}
+
+application {
+    mainClass = 'cse262.slang.Slang'
+}
+
+jar {
+    manifest {
+        attributes(
+            "Main-Class": 'cse262.slang.Slang'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

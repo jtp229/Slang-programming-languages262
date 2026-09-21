@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Set>
+  <Identifier val="x"/>
+  <Dbl val="4.4"/>
+ </Set>
+</Ast>

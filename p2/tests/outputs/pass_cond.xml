@@ -1,0 +1,68 @@
+<Ast xmlns="ast">
+ <Cond>
+  <Condition>
+   <Test>
+    <Call>
+     <Identifier val="&gt;"/>
+     <Int val="1"/>
+     <Int val="2"/>
+    </Call>
+   </Test>
+   <Actions>
+    <Call>
+     <Identifier val="x"/>
+    </Call>
+    <Identifier val="a"/>
+    <Int val="2"/>
+    <Int val="3"/>
+    <Cons>
+     <Int val="1"/>
+     <Cons>
+      <Int val="2"/>
+      <Cons>
+       <Int val="3"/>
+       <Cons>
+        <Int val="4"/>
+        <Cons>
+         <Int val="5"/>
+         <Empty/>
+        </Cons>
+       </Cons>
+      </Cons>
+     </Cons>
+    </Cons>
+    <Call>
+     <Identifier val="+"/>
+     <Int val="1"/>
+     <Int val="2"/>
+    </Call>
+   </Actions>
+  </Condition>
+  <Condition>
+   <Test>
+    <Call>
+     <Identifier val="&lt;"/>
+     <Int val="1"/>
+     <Int val="2"/>
+    </Call>
+   </Test>
+   <Actions>
+    <Identifier val="x"/>
+   </Actions>
+  </Condition>
+  <Condition>
+   <Test>
+    <Bool val="true"/>
+   </Test>
+   <Actions>
+    <Bool val="true"/>
+   </Actions>
+  </Condition>
+  <Condition>
+   <Test>
+    <Bool val="false"/>
+   </Test>
+   <Actions/>
+  </Condition>
+ </Cond>
+</Ast>

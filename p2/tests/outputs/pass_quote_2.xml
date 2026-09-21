@@ -1,0 +1,5 @@
+<Ast xmlns="ast">
+ <Quote>
+  <Int val="1"/>
+ </Quote>
+</Ast>

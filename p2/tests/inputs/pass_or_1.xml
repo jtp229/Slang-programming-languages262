@@ -1,0 +1,8 @@
+<Tokens xmlns="tokens">
+ <LeftParenToken col="1" line="1"/>
+ <OrToken col="2" line="1"/>
+ <BoolToken col="5" line="1" val="true"/>
+ <BoolToken col="8" line="1" val="false"/>
+ <RightParenToken col="10" line="1"/>
+ <EofToken/>
+</Tokens>

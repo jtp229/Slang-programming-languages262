@@ -1,0 +1,4 @@
+<Tokens xmlns="tokens">
+ <DblToken col="1" line="1" val="100.10101"/>
+ <EofToken/>
+</Tokens>

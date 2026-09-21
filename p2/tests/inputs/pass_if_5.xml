@@ -1,0 +1,19 @@
+<Tokens xmlns="tokens">
+ <LeftParenToken col="1" line="1"/>
+ <IfToken col="2" line="1"/>
+ <BoolToken col="5" line="1" val="false"/>
+ <LeftParenToken col="8" line="1"/>
+ <IdentifierToken col="9" line="1" val="+"/>
+ <IntToken col="11" line="1" val="1"/>
+ <IntToken col="13" line="1" val="2"/>
+ <IntToken col="15" line="1" val="3"/>
+ <RightParenToken col="16" line="1"/>
+ <AbbrevToken col="18" line="1"/>
+ <VecToken col="19" line="1"/>
+ <IntToken col="21" line="1" val="1"/>
+ <IntToken col="23" line="1" val="2"/>
+ <IntToken col="25" line="1" val="3"/>
+ <RightParenToken col="26" line="1"/>
+ <RightParenToken col="27" line="1"/>
+ <EofToken/>
+</Tokens>

@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <And>
+  <Bool val="false"/>
+  <Identifier val="explode"/>
+ </And>
+</Ast>

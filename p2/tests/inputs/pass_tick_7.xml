@@ -1,0 +1,5 @@
+<Tokens xmlns="tokens">
+ <AbbrevToken col="1" line="1"/>
+ <DblToken col="2" line="1" val="-1.1"/>
+ <EofToken/>
+</Tokens>

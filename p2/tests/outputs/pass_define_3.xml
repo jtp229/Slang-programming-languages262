@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="a"/>
+  <Symbol val="a"/>
+ </DefineVar>
+</Ast>

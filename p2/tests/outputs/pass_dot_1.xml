@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Cons>
+  <Symbol val="a"/>
+  <Symbol val="b"/>
+ </Cons>
+</Ast>

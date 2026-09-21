@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Or>
+  <Bool val="true"/>
+  <Identifier val="explode"/>
+ </Or>
+</Ast>
