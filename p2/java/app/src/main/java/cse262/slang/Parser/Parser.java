@@ -88,7 +88,7 @@ public class Parser {
         if (peek(Tokens.Abbrev.class)) {
             stream.popAny();
             AstNodes.Datum datum = parseDatum();
-            return new AstNodes.Tick(datum);
+            return datum;
         }
         
         // <constant> | <identifier>
@@ -163,7 +163,7 @@ public class Parser {
             stream.popAny();
             return new AstNodes.Char(((Tokens.Char) t).value);
         }
-        throw new ParseError("Invalid constant");
+        throw new ParseError(stream);
     }
     private AstNodes.AstNode parseDefine() throws ParseError{
         stream.popToken(Tokens.Define.class);
@@ -172,12 +172,15 @@ public class Parser {
             //Functino shorthand: (DEFINE ( name args .. . .)body .. .)
             stream.popAny(); //consume Lparen
             List<AstNodes.Identifier> names = new ArrayList<>();
+            if (peek(Tokens.RightParen.class)) {
+                throw new ParseError(stream);
+            }
         
         //parse function name and arguments
         while (!peek(Tokens.RightParen.class)){
             Tokens.Token t = stream.nextToken();
             if (!(t instanceof Tokens.Identifier)){
-                throw new ParseError("Expected identifier in define");
+                throw new ParseError(stream);
             }
             stream.popAny();
             names.add(new AstNodes.Identifier(((Tokens.Identifier) t).tokenText));
@@ -187,6 +190,9 @@ public class Parser {
 
         //parse body expressions
         List<AstNodes.AstNode> body = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while (!peek(Tokens.RightParen.class)) {
             body.add(parseExpression());
         }
@@ -197,7 +203,7 @@ public class Parser {
         //Simple define: DEFINE name value
         Tokens.Token name = stream.nextToken();
         if (!(name instanceof Tokens.Identifier)){
-            throw new ParseError("Expected identifier in define");
+            throw new ParseError(stream);
         }
         stream.popAny();
         AstNodes.AstNode value = parseExpression();
@@ -216,7 +222,7 @@ public class Parser {
         while (!peek(Tokens.RightParen.class)) {
             Tokens.Token t = stream.nextToken();
             if (!(t instanceof Tokens.Identifier)) {
-                throw new ParseError("Expected identifier in lambda");
+                throw new ParseError(stream);
             }
             stream.popAny();
             params.add(new AstNodes.Identifier(((Tokens.Identifier) t).tokenText));
@@ -225,6 +231,9 @@ public class Parser {
         
         // Parse body
         List<AstNodes.AstNode> body = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while (!peek(Tokens.RightParen.class)) {
             body.add(parseExpression());
         }
@@ -248,7 +257,7 @@ public class Parser {
         stream.popToken(Tokens.Set.class);
         Tokens.Token name = stream.nextToken();
         if (!(name instanceof Tokens.Identifier)){
-            throw new ParseError("Expected identifier in set!");
+            throw new ParseError(stream);
         }
         stream.popAny();
         AstNodes.AstNode value = parseExpression();
@@ -260,6 +269,9 @@ public class Parser {
     private AstNodes.AstNode parseAnd() throws ParseError {
         stream.popToken(Tokens.And.class);
         List<AstNodes.AstNode> exprs = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while(!peek(Tokens.RightParen.class)){
             exprs.add(parseExpression());
 
@@ -272,6 +284,9 @@ public class Parser {
     private AstNodes.AstNode parseOr() throws ParseError {
         stream.popToken(Tokens.Or.class);
         List<AstNodes.AstNode> exprs = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while (!peek(Tokens.RightParen.class)) {
             exprs.add(parseExpression());
         }
@@ -283,6 +298,9 @@ public class Parser {
      private AstNodes.AstNode parseBegin() throws ParseError {
         stream.popToken(Tokens.Begin.class);
         List<AstNodes.AstNode> exprs = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while (!peek(Tokens.RightParen.class)) {
             exprs.add(parseExpression());
         }
@@ -293,6 +311,9 @@ public class Parser {
     private AstNodes.AstNode parseCond() throws ParseError {
         stream.popToken(Tokens.Cond.class);
         List<AstNodes.Cond.Condition> conditions = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         
         while (!peek(Tokens.RightParen.class)) {
             stream.popToken(Tokens.LeftParen.class);
@@ -315,12 +336,15 @@ public class Parser {
         // Parse bindings
         stream.popToken(Tokens.LeftParen.class);
         List<AstNodes.Let.LetDef> bindings = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         
         while (!peek(Tokens.RightParen.class)) {
             stream.popToken(Tokens.LeftParen.class);
             Tokens.Token name = stream.nextToken();
             if (!(name instanceof Tokens.Identifier)) {
-                throw new ParseError("Expected identifier in let binding");
+                throw new ParseError(stream);
             }
             stream.popAny();
             AstNodes.AstNode value = parseExpression();
@@ -334,6 +358,9 @@ public class Parser {
         
         // Parse body
         List<AstNodes.AstNode> body = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while (!peek(Tokens.RightParen.class)) {
             body.add(parseExpression());
         }
@@ -353,6 +380,9 @@ public class Parser {
     //call
     private AstNodes.AstNode parseCall() throws ParseError {
         List<AstNodes.AstNode> exprs = new ArrayList<>();
+        if (peek(Tokens.RightParen.class)) {
+            throw new ParseError(stream);
+        }
         while (!peek(Tokens.RightParen.class)) {
             exprs.add(parseExpression());
         }
@@ -420,7 +450,7 @@ public class Parser {
             return new AstNodes.Vec(datums);
         }
         
-        throw new ParseError("Invalid datum");
+        throw new ParseError(stream);
     }
 
 
