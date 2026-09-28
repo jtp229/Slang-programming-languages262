@@ -85,19 +85,53 @@ public class Parser {
 
     }
     private AstNodes.AstNode parseExpression() throws ParseError{
-        if (peek(Tokens.Abbrev.class)){
+        if (peek(Tokens.Abbrev.class)) {
             stream.popAny();
             AstNodes.Datum datum = parseDatum();
             return new AstNodes.Tick(datum);
         }
-        if(isConstant() || peek(Tokens.Identifier.class)){
+        
+        // <constant> | <identifier>
+        if (isConstant() || peek(Tokens.Identifier.class)) {
             return parseConstantOrIdentifier();
         }
-        if(!peek(Tokens.LeftParen.class)) {
+        
+        // Everything else starts with LPAREN
+        if (!peek(Tokens.LeftParen.class)) {
             throw new ParseError(stream);
         }
-        stream.popAny(); // consumelparen
-
+        stream.popAny();  // consume LPAREN
+        
+        // Check which special form or call
+        if (peek(Tokens.Define.class)) {
+            return parseDefine();
+        } else if (peek(Tokens.Quote.class)) {
+            stream.popAny();
+            AstNodes.Datum datum = parseDatum();
+            stream.popToken(Tokens.RightParen.class);
+            return new AstNodes.Quote(datum);
+        } else if (peek(Tokens.Lambda.class)) {
+            return parseLambda();
+        } else if (peek(Tokens.If.class)) {
+            return parseIf();
+        } else if (peek(Tokens.Set.class)) {
+            return parseSet();
+        } else if (peek(Tokens.And.class)) {
+            return parseAnd();
+        } else if (peek(Tokens.Or.class)) {
+            return parseOr();
+        } else if (peek(Tokens.Begin.class)) {
+            return parseBegin();
+        } else if (peek(Tokens.Cond.class)) {
+            return parseCond();
+        } else if (peek(Tokens.Apply.class)) {
+            return parseApply();
+        } else if (peek(Tokens.Let.class)) {
+            return parseLet();
+        } else {
+       
+            return parseCall();
+        }
     }
 
     private AstNodes.AstNode parseConstantOrIdentifier() throws ParseError {
@@ -173,6 +207,31 @@ public class Parser {
     }
     }
     //time to parse specific expressions
+    private AstNodes.AstNode parseLambda() throws ParseError {
+        stream.popToken(Tokens.Lambda.class);
+        
+        // Parse formals: (id* )
+        stream.popToken(Tokens.LeftParen.class);
+        List<AstNodes.Identifier> params = new ArrayList<>();
+        while (!peek(Tokens.RightParen.class)) {
+            Tokens.Token t = stream.nextToken();
+            if (!(t instanceof Tokens.Identifier)) {
+                throw new ParseError("Expected identifier in lambda");
+            }
+            stream.popAny();
+            params.add(new AstNodes.Identifier(((Tokens.Identifier) t).tokenText));
+        }
+        stream.popToken(Tokens.RightParen.class);
+        
+        // Parse body
+        List<AstNodes.AstNode> body = new ArrayList<>();
+        while (!peek(Tokens.RightParen.class)) {
+            body.add(parseExpression());
+        }
+        stream.popToken(Tokens.RightParen.class);
+        
+        return new AstNodes.LambdaDef(params, body);
+    }
 
     //IF <expression> <expression> <expression>
 
@@ -210,32 +269,170 @@ public class Parser {
     }
 
     //or expression
-
-
-
+    private AstNodes.AstNode parseOr() throws ParseError {
+        stream.popToken(Tokens.Or.class);
+        List<AstNodes.AstNode> exprs = new ArrayList<>();
+        while (!peek(Tokens.RightParen.class)) {
+            exprs.add(parseExpression());
+        }
+        stream.popToken(Tokens.RightParen.class);
+        return new AstNodes.Or(exprs);
+    }
     //begin expression
 
-
-
-
-
-    private AstNodes.AstNode parseDatum() throws ParseError {
-        if(isConstant()) {
-            return parseConstantOrIdentifier();
+     private AstNodes.AstNode parseBegin() throws ParseError {
+        stream.popToken(Tokens.Begin.class);
+        List<AstNodes.AstNode> exprs = new ArrayList<>();
+        while (!peek(Tokens.RightParen.class)) {
+            exprs.add(parseExpression());
         }
+        stream.popToken(Tokens.RightParen.class);
+        return new AstNodes.Begin(exprs);
     }
+    // cond 
+    private AstNodes.AstNode parseCond() throws ParseError {
+        stream.popToken(Tokens.Cond.class);
+        List<AstNodes.Cond.Condition> conditions = new ArrayList<>();
+        
+        while (!peek(Tokens.RightParen.class)) {
+            stream.popToken(Tokens.LeftParen.class);
+            AstNodes.AstNode test = parseExpression();
+            List<AstNodes.AstNode> exprs = new ArrayList<>();
+            while (!peek(Tokens.RightParen.class)) {
+                exprs.add(parseExpression());
+            }
+            stream.popToken(Tokens.RightParen.class);
+            conditions.add(new AstNodes.Cond.Condition(test, exprs));
+        }
+        
+        stream.popToken(Tokens.RightParen.class);
+        return new AstNodes.Cond(conditions);
+    }
+    //let 
+     private AstNodes.AstNode parseLet() throws ParseError {
+        stream.popToken(Tokens.Let.class);
+        
+        // Parse bindings
+        stream.popToken(Tokens.LeftParen.class);
+        List<AstNodes.Let.LetDef> bindings = new ArrayList<>();
+        
+        while (!peek(Tokens.RightParen.class)) {
+            stream.popToken(Tokens.LeftParen.class);
+            Tokens.Token name = stream.nextToken();
+            if (!(name instanceof Tokens.Identifier)) {
+                throw new ParseError("Expected identifier in let binding");
+            }
+            stream.popAny();
+            AstNodes.AstNode value = parseExpression();
+            stream.popToken(Tokens.RightParen.class);
+            bindings.add(new AstNodes.Let.LetDef(
+                new AstNodes.Identifier(((Tokens.Identifier) name).tokenText), 
+                value
+            ));
+        }
+        stream.popToken(Tokens.RightParen.class);
+        
+        // Parse body
+        List<AstNodes.AstNode> body = new ArrayList<>();
+        while (!peek(Tokens.RightParen.class)) {
+            body.add(parseExpression());
+        }
+        stream.popToken(Tokens.RightParen.class);
+        
+        return new AstNodes.Let(bindings, body);
+    }
+    //apply
+
+    private AstNodes.AstNode parseApply() throws ParseError {
+        stream.popToken(Tokens.Apply.class);
+        AstNodes.AstNode func = parseExpression();
+        AstNodes.AstNode args = parseExpression();
+        stream.popToken(Tokens.RightParen.class);
+        return new AstNodes.Apply(func, args);
+    }
+    //call
+    private AstNodes.AstNode parseCall() throws ParseError {
+        List<AstNodes.AstNode> exprs = new ArrayList<>();
+        while (!peek(Tokens.RightParen.class)) {
+            exprs.add(parseExpression());
+        }
+        stream.popToken(Tokens.RightParen.class);
+        return new AstNodes.Call(exprs);
+    }
+
+
+
+    
+
+
+
+
+
+  private AstNodes.Datum parseDatum() throws ParseError {
+
+        if (isConstant()) {
+            return (AstNodes.Datum) parseConstantOrIdentifier();
+        }
+        
+  
+        if (peek(Tokens.Identifier.class)) {
+            Tokens.Token t = stream.nextToken();
+            stream.popAny();
+            return new AstNodes.Symbol(((Tokens.Identifier) t).tokenText);
+        }
+        
+   
+        if (peek(Tokens.LeftParen.class)) {
+            stream.popAny();
+            
+            if (peek(Tokens.RightParen.class)) {
+                stream.popAny();
+                return new AstNodes.EmptyCons();
+            }
+            
+            List<AstNodes.Datum> datums = new ArrayList<>();
+            datums.add(parseDatum());
+            
+            if (peek(Tokens.Dot.class)) {
+
+                stream.popAny();
+                AstNodes.Datum cdr = parseDatum();
+                stream.popToken(Tokens.RightParen.class);
+                return AstNodes.Cons.makeCons(datums.get(0), cdr);
+            } else {
+
+                while (!peek(Tokens.RightParen.class)) {
+                    datums.add(parseDatum());
+                }
+                stream.popToken(Tokens.RightParen.class);
+                return AstNodes.Cons.makeConsList(datums);
+            }
+        }
+        
+      
+        if (peek(Tokens.Vec.class)) {
+            stream.popAny();
+            List<AstNodes.Datum> datums = new ArrayList<>();
+            while (!peek(Tokens.RightParen.class)) {
+                datums.add(parseDatum());
+            }
+            stream.popToken(Tokens.RightParen.class);
+            return new AstNodes.Vec(datums);
+        }
+        
+        throw new ParseError("Invalid datum");
+    }
+
+
+
     private boolean isConstant() {
-        return peek(Tokens.Int.class) || peek(Tokens.Dbl.class) || peek(Tokens.Bool.class) || peek(Tokens.Str.class) || peek(Tokens.Char.class);
-
+        return peek(Tokens.Int.class) || peek(Tokens.Dbl.class) || peek(Tokens.Bool.class) 
+            || peek(Tokens.Str.class) || peek(Tokens.Char.class);
     }
-
-
-
-
 
 
     private boolean peek(Class<?> type){
-        return hasNext() && type.isInstance(stream);
+        return hasNext() && type.isInstance(stream.nextToken());
     }
 
 
