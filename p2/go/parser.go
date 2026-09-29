@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // ParseError is *not* an AstNode.  We use it to report errors.
 type ParseError struct {
 	msg string // A description of the error
@@ -229,154 +231,611 @@ func makeCons(items []AstNode) (AstNode, error) {
 // In terms of implementation, this is a recursive descent parser.  Scheme's
 // syntax makes the whole affair quite easy.
 func parse_program(stream *TokenStream) ([]AstNode, error) {
-	var []results AstNode
+	var results []AstNode
 
-	for stream.HasNext() && !isEOF(stream){
+	for stream.HasNext() && !isEOF(stream) {
 		expr, err := parseExpression(stream)
-		if != nil{
-		return nil, err
+		if err != nil {
+			return nil, err
 		}
-	
-	results = append(results,expr)
-}
-return results, nil
 
-}
-
-//parseExpression handles all expression types
-func parseExpression(stream *TokenStream)(AstNode, error){
-//datum
-if isToken(stream, "ABBREV"){
-	stream.popAny()
-	datum, err := parseDatum(stream)
-	if err!=nil{
-		return nil, err
+		results = append(results, expr)
 	}
-	return &TickNode {datum: datum}, nil
+	return results, nil
 
 }
-if isConstant(stream) || isToken(stream, "IDENTIFIER"){
-	return parseConstantOrIdentifier(stream)
-}
-//Everything else should start with lparen
-if !isToken(stream, "LPAREN"){
-	return nil, formatParseError(stream)
-}
-stream.PopAny() //consume lparen
-if isToken(stream, "DEFINE"){
-	return parseDefine(stream)
-} else if isToken(stream, "QUOTE"){
-	stream.PopAny()
-	datum, err := parseDatum(stream)
-	if err != nil{
-		return nil, err
+
+// parseExpression handles all expression types
+func parseExpression(stream *TokenStream) (AstNode, error) {
+	// datum
+	if isToken(stream, "ABBREV") {
+		stream.popAny()
+		datum, err := parseDatum(stream)
+		if err != nil {
+			return nil, err
+		}
+		return datum, nil
+
 	}
-	if err := popToken(stream, "RPAREN"); err != nil {
-		return nil, err
+	if isConstant(stream) || isToken(stream, "IDENTIFIER") {
+		return parseConstantOrIdentifier(stream)
 	}
-	return &QuoteNode{datum: datum}, nil
-	//do rest of keywords
-} else if{
-
+	// Everything else should start with lparen
+	if !isToken(stream, "LPAREN") {
+		return nil, formatParseError(stream)
+	}
+	stream.PopAny() //consume lparen
+	if isToken(stream, "DEFINE") {
+		return parseDefine(stream)
+	} else if isToken(stream, "QUOTE") {
+		stream.PopAny()
+		datum, err := parseDatum(stream)
+		if err != nil {
+			return nil, err
+		}
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+		return &QuoteNode{datum: datum}, nil
+		//do rest of keywords
+	} else if isToken(stream, "LAMBDA") {
+		return parseLambda(stream)
+	} else if isToken(stream, "IF") {
+		return parseIf(stream)
+	} else if isToken(stream, "SET") {
+		return parseSet(stream)
+	} else if isToken(stream, "AND") {
+		return parseAnd(stream)
+	} else if isToken(stream, "OR") {
+		return parseOr(stream)
+	} else if isToken(stream, "BEGIN") {
+		return parseBegin(stream)
+	} else if isToken(stream, "COND") {
+		return parseCond(stream)
+	} else if isToken(stream, "APPLY") {
+		return parseApply(stream)
+	} else if isToken(stream, "LET") {
+		return parseLet(stream)
+	} else {
+		// <call> --> LPAREN <expression>+ RPAREN
+		return parseCall(stream)
+	}
 }
-}
 
-
-func parseConstantOrIdentifier(stream *TokenStream) (AstNode, error){
+func parseConstantOrIdentifier(stream *TokenStream) (AstNode, error) {
 	tok := stream.Peek()
 
-
 	switch tok.Type {
-		case "IDENTIFIER":
+	case TOK_IDENTIFIER:
 		stream.PopAny()
 		return &IdentifierNode{id: tok.Text}, nil
-	case "INT":
+	case TOK_INT:
 		stream.PopAny()
-		return &IntNode{val: tok.Value.(int)}, nil
-	case "DBL":
+		return &IntNode{val: tok.literal.(IntLit).val}, nil
+	case TOK_DBL:
 		stream.PopAny()
-		return &DblNode{val: tok.Value.(float64)}, nil
-	case "BOOL":
+		return &DblNode{val: tok.literal.(DblLit).val}, nil
+	case TOK_BOOL:
 		stream.PopAny()
-		if tok.Value.(bool) {
+		if tok.literal.(BoolLit).val {
 			return &BoolTrueNode{}, nil
 		}
 		return &BoolFalseNode{}, nil
-	case "STR":
+	case TOK_STR:
 		stream.PopAny()
-		return &StrNode{val: tok.Value.(string)}, nil
-	case "CHAR":
+		return &StrNode{val: tok.literal.(StrLit).val}, nil
+	case TOK_CHAR:
 		stream.PopAny()
-		return &CharNode{val: tok.Value.(byte)}, nil
+		return &CharNode{val: tok.literal.(CharLit).val}, nil
 	default:
 		return nil, ParseError{msg: "Invalid constant"}
 	}
 
 }
 
-func parseDefine(stream *TokenStream)(AstNode, error){
+func parseDefine(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "DEFINE"); err != nil {
 		return nil, err
 	}
+
+	// Check if function shorthand or simple define
+	if isToken(stream, "LPAREN") {
+		// Function shorthand: (DEFINE (name arg1 arg2...) body...)
+		stream.PopAny() // consume LPAREN
+
+		var names []IdentifierNode
+		if isToken(stream, "RPAREN") {
+			return nil, formatParseError(stream)
+		}
+		for !isToken(stream, "RPAREN") {
+			tok := stream.Peek()
+			if tok.Type != TOK_IDENTIFIER {
+				return nil, formatParseError(stream)
+			}
+			stream.PopAny()
+			names = append(names, IdentifierNode{id: tok.Text})
+		}
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+
+		// Parse body expressions
+		var body []AstNode
+		if isToken(stream, "RPAREN") {
+			return nil, formatParseError(stream)
+		}
+		for !isToken(stream, "RPAREN") {
+			expr, err := parseExpression(stream)
+			if err != nil {
+				return nil, err
+			}
+			body = append(body, expr)
+		}
+
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+		return &DefineFuncNode{ids: names, body: body}, nil
+	}
+
+	// Simple define: (DEFINE name value)
+	tok := stream.Peek()
+	if tok.Type != TOK_IDENTIFIER {
+		return nil, formatParseError(stream)
+	}
+	stream.PopAny()
+
+	value, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &DefineVarNode{
+		identifier: IdentifierNode{id: tok.Text},
+		expression: value,
+	}, nil
 }
 
-func parseLambda(stream *TokenStream)(AstNode, error){
+func parseLambda(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "LAMBDA"); err != nil {
+		return nil, err
+	}
+
+	// Parse formals: (id* )
+	if err := popToken(stream, "LPAREN"); err != nil {
+		return nil, err
+	}
+
+	var params []IdentifierNode
+	for !isToken(stream, "RPAREN") {
+		tok := stream.Peek()
+		if tok.Type != TOK_IDENTIFIER {
+			return nil, formatParseError(stream)
+		}
+		stream.PopAny()
+		params = append(params, IdentifierNode{id: tok.Text})
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	// Parse body
+	var body []AstNode
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		expr, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+		body = append(body, expr)
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &LambdaDefNode{formals: params, body: body}, nil
 
 }
 
-func parseIf(stream *TokenStream)(AstNode, error){
+func parseIf(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "IF"); err != nil {
+		return nil, err
+	}
+
+	test, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	consequent, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	alternate, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &IfNode{cond: test, if_true: consequent, if_false: alternate}, nil
 
 }
 
-func parseSet(stream *TokenStream)(AstNode, error){
+func parseSet(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "SET"); err != nil {
+		return nil, err
+	}
+
+	tok := stream.Peek()
+	if tok.Type != TOK_IDENTIFIER {
+		return nil, formatParseError(stream)
+	}
+	stream.PopAny()
+
+	value, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &SetNode{
+		identifier: IdentifierNode{id: tok.Text},
+		expression: value,
+	}, nil
 
 }
 
-func parseAnd(stream *TokenStream)(AstNode, error){
+func parseAnd(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "AND"); err != nil {
+		return nil, err
+	}
+
+	var exprs []AstNode
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		expr, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+		exprs = append(exprs, expr)
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &AndNode{exprs: exprs}, nil
 
 }
 
-func parseOr(stream *TokenStream)(AstNode, error){
+func parseOr(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "OR"); err != nil {
+		return nil, err
+	}
+
+	var exprs []AstNode
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		expr, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+		exprs = append(exprs, expr)
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &OrNode{exprs: exprs}, nil
 
 }
 
-func parseBegin(stream *TokenStream)(AstNode, error){
+func parseBegin(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "BEGIN"); err != nil {
+		return nil, err
+	}
+
+	var exprs []AstNode
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		expr, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+		exprs = append(exprs, expr)
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &BeginNode{exprs: exprs}, nil
+}
+
+func parseCond(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "COND"); err != nil {
+		return nil, err
+	}
+
+	var conditions []Condition
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		if err := popToken(stream, "LPAREN"); err != nil {
+			return nil, err
+		}
+
+		test, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+
+		var exprs []AstNode
+		for !isToken(stream, "RPAREN") {
+			expr, err := parseExpression(stream)
+			if err != nil {
+				return nil, err
+			}
+			exprs = append(exprs, expr)
+		}
+
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+
+		conditions = append(conditions, Condition{test: test, exprs: exprs})
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &CondNode{conditions: conditions}, nil
 
 }
 
-func parseCond(stream *TokenStream)(AstNode, error){
+func parseLet(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "LET"); err != nil {
+		return nil, err
+	}
+
+	// Parse bindings
+	if err := popToken(stream, "LPAREN"); err != nil {
+		return nil, err
+	}
+
+	var bindings []LetDef
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		if err := popToken(stream, "LPAREN"); err != nil {
+			return nil, err
+		}
+
+		tok := stream.Peek()
+		if tok.Type != TOK_IDENTIFIER {
+			return nil, formatParseError(stream)
+		}
+		stream.PopAny()
+
+		value, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+
+		bindings = append(bindings, LetDef{
+			id:  IdentifierNode{id: tok.Text},
+			val: value,
+		})
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	// Parse body
+	var body []AstNode
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		expr, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+		body = append(body, expr)
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &LetNode{vars: bindings, body: body}, nil
 
 }
 
-func parseLet(stream *TokenStream)(AstNode, error){
+func parseApply(stream *TokenStream) (AstNode, error) {
+	if err := popToken(stream, "APPLY"); err != nil {
+		return nil, err
+	}
 
-}
+	fn, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
 
-func parseApply(strean *TokenStream)(AstNode, error){
+	args, err := parseExpression(stream)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &ApplyNode{function: fn, args: args}, nil
 
 }
 func parseCall(stream *TokenStream) (AstNode, error) {
-	
+	var exprs []AstNode
+	if isToken(stream, "RPAREN") {
+		return nil, formatParseError(stream)
+	}
+	for !isToken(stream, "RPAREN") {
+		expr, err := parseExpression(stream)
+		if err != nil {
+			return nil, err
+		}
+		exprs = append(exprs, expr)
+	}
+
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+
+	return &CallNode{exprs: exprs}, nil
+
 }
 
 func parseDatum(stream *TokenStream) (AstNode, error) {
+	// <constant>
+	if isConstant(stream) {
+		return parseConstant(stream)
+	}
+
+	// <symbol>
+	if isToken(stream, "IDENTIFIER") {
+		tok := stream.Peek()
+		stream.PopAny()
+		return &SymbolNode{name: tok.Text}, nil
+	}
+
+	// <list> or <cons>
+	if isToken(stream, "LPAREN") {
+		stream.PopAny()
+
+		if isToken(stream, "RPAREN") {
+			stream.PopAny()
+			return &EmptyConsNode{}, nil
+		}
+
+		first, err := parseDatum(stream)
+		if err != nil {
+			return nil, err
+		}
+
+		if isToken(stream, "DOT") {
+			// <cons> LPAREN <datum> DOT <datum> RPAREN
+			stream.PopAny()
+			cdr, err := parseDatum(stream)
+			if err != nil {
+				return nil, err
+			}
+			if err := popToken(stream, "RPAREN"); err != nil {
+				return nil, err
+			}
+			return &ConsNode{car: first, cdr: cdr}, nil
+		}
+
+		// <list> LPAREN <datum>* RPAREN
+		var datums []AstNode
+		datums = append(datums, first)
+
+		for !isToken(stream, "RPAREN") {
+			datum, err := parseDatum(stream)
+			if err != nil {
+				return nil, err
+			}
+			datums = append(datums, datum)
+		}
+
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+
+		result, err := makeCons(datums)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	}
+
+	// <vector> VEC <datum>* RPAREN
+	if isToken(stream, "VEC") {
+		stream.PopAny()
+		var items []AstNode
+		for !isToken(stream, "RPAREN") {
+			datum, err := parseDatum(stream)
+			if err != nil {
+				return nil, err
+			}
+			items = append(items, datum)
+		}
+		if err := popToken(stream, "RPAREN"); err != nil {
+			return nil, err
+		}
+		return &VecNode{items: items}, nil
+	}
+
+	return nil, formatParseError(stream)
 
 }
 
 func parseConstant(stream *TokenStream) (AstNode, error) {
+	return parseConstantOrIdentifier(stream)
 }
-
-
-
 
 func isConstant(stream *TokenStream) bool {
 	tok := stream.Peek()
-	return tok.Type == "INT" || tok.Type == "DBL" || tok.Type == "BOOL" ||
-		tok.Type == "STR" || tok.Type == "CHAR"
+	return tok.Type == TOK_INT || tok.Type == TOK_DBL || tok.Type == TOK_BOOL ||
+		tok.Type == TOK_STR || tok.Type == TOK_CHAR
 }
 
 func isToken(stream *TokenStream, tokenType string) bool {
-	return stream.HasNext() && stream.Peek().Type == tokenType
+	if !stream.HasNext() {
+		return false
+	}
+
+	tokenTypes := map[string]int{
+		"ABBREV": TOK_ABBREV, "AND": TOK_AND, "APPLY": TOK_APPLY,
+		"BEGIN": TOK_BEGIN, "BOOL": TOK_BOOL, "CHAR": TOK_CHAR,
+		"COND": TOK_COND, "DBL": TOK_DBL, "DEFINE": TOK_DEFINE,
+		"DOT": TOK_DOT, "EOF": TOK_EOF, "IDENTIFIER": TOK_IDENTIFIER,
+		"IF": TOK_IF, "INT": TOK_INT, "LAMBDA": TOK_LAMBDA,
+		"LPAREN": TOK_LEFT_PAREN, "LET": TOK_LET, "OR": TOK_OR,
+		"QUOTE": TOK_QUOTE, "RPAREN": TOK_RIGHT_PAREN, "SET": TOK_SET,
+		"STR": TOK_STR, "VEC": TOK_VECTOR,
+	}
+	typeID, ok := tokenTypes[tokenType]
+	return ok && stream.Peek().Type == typeID
 }
 
 func isEOF(stream *TokenStream) bool {
@@ -399,5 +858,14 @@ func formatParseError(stream *TokenStream) error {
 	return ParseError{msg: "Parse Error: EOF"}
 }
 
+func (t *TokenStream) HasNext() bool {
+	return t.next < len(t.tokens)
+}
 
+func (t *TokenStream) Peek() Token {
+	return t.nextToken()
+}
 
+func (t *TokenStream) PopAny() {
+	t.popAny()
+}
