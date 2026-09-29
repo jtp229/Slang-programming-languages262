@@ -229,5 +229,175 @@ func makeCons(items []AstNode) (AstNode, error) {
 // In terms of implementation, this is a recursive descent parser.  Scheme's
 // syntax makes the whole affair quite easy.
 func parse_program(stream *TokenStream) ([]AstNode, error) {
-	return nil, ParseError{"parse_program not implemented"}
+	var []results AstNode
+
+	for stream.HasNext() && !isEOF(stream){
+		expr, err := parseExpression(stream)
+		if != nil{
+		return nil, err
+		}
+	
+	results = append(results,expr)
 }
+return results, nil
+
+}
+
+//parseExpression handles all expression types
+func parseExpression(stream *TokenStream)(AstNode, error){
+//datum
+if isToken(stream, "ABBREV"){
+	stream.popAny()
+	datum, err := parseDatum(stream)
+	if err!=nil{
+		return nil, err
+	}
+	return &TickNode {datum: datum}, nil
+
+}
+if isConstant(stream) || isToken(stream, "IDENTIFIER"){
+	return parseConstantOrIdentifier(stream)
+}
+//Everything else should start with lparen
+if !isToken(stream, "LPAREN"){
+	return nil, formatParseError(stream)
+}
+stream.PopAny() //consume lparen
+if isToken(stream, "DEFINE"){
+	return parseDefine(stream)
+} else if isToken(stream, "QUOTE"){
+	stream.PopAny()
+	datum, err := parseDatum(stream)
+	if err != nil{
+		return nil, err
+	}
+	if err := popToken(stream, "RPAREN"); err != nil {
+		return nil, err
+	}
+	return &QuoteNode{datum: datum}, nil
+	//do rest of keywords
+} else if{
+
+}
+}
+
+
+func parseConstantOrIdentifier(stream *TokenStream) (AstNode, error){
+	tok := stream.Peek()
+
+
+	switch tok.Type {
+		case "IDENTIFIER":
+		stream.PopAny()
+		return &IdentifierNode{id: tok.Text}, nil
+	case "INT":
+		stream.PopAny()
+		return &IntNode{val: tok.Value.(int)}, nil
+	case "DBL":
+		stream.PopAny()
+		return &DblNode{val: tok.Value.(float64)}, nil
+	case "BOOL":
+		stream.PopAny()
+		if tok.Value.(bool) {
+			return &BoolTrueNode{}, nil
+		}
+		return &BoolFalseNode{}, nil
+	case "STR":
+		stream.PopAny()
+		return &StrNode{val: tok.Value.(string)}, nil
+	case "CHAR":
+		stream.PopAny()
+		return &CharNode{val: tok.Value.(byte)}, nil
+	default:
+		return nil, ParseError{msg: "Invalid constant"}
+	}
+
+}
+
+func parseDefine(stream *TokenStream)(AstNode, error){
+	if err := popToken(stream, "DEFINE"); err != nil {
+		return nil, err
+	}
+}
+
+func parseLambda(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseIf(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseSet(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseAnd(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseOr(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseBegin(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseCond(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseLet(stream *TokenStream)(AstNode, error){
+
+}
+
+func parseApply(strean *TokenStream)(AstNode, error){
+
+}
+func parseCall(stream *TokenStream) (AstNode, error) {
+	
+}
+
+func parseDatum(stream *TokenStream) (AstNode, error) {
+
+}
+
+func parseConstant(stream *TokenStream) (AstNode, error) {
+}
+
+
+
+
+func isConstant(stream *TokenStream) bool {
+	tok := stream.Peek()
+	return tok.Type == "INT" || tok.Type == "DBL" || tok.Type == "BOOL" ||
+		tok.Type == "STR" || tok.Type == "CHAR"
+}
+
+func isToken(stream *TokenStream, tokenType string) bool {
+	return stream.HasNext() && stream.Peek().Type == tokenType
+}
+
+func isEOF(stream *TokenStream) bool {
+	return isToken(stream, "EOF")
+}
+
+func popToken(stream *TokenStream, expected string) error {
+	if !isToken(stream, expected) {
+		return formatParseError(stream)
+	}
+	stream.PopAny()
+	return nil
+}
+
+func formatParseError(stream *TokenStream) error {
+	if stream.HasNext() {
+		tok := stream.Peek()
+		return ParseError{msg: fmt.Sprintf("Parse Error: line %d, col %d", tok.Line, tok.Col)}
+	}
+	return ParseError{msg: "Parse Error: EOF"}
+}
+
+
+
