@@ -245,9 +245,9 @@ func parse_program(stream *TokenStream) ([]AstNode, error) {
 
 }
 
-// parseExpression handles all expression types
+// parseExpression handles all expression types for one expression
 func parseExpression(stream *TokenStream) (AstNode, error) {
-	// datum
+	// qoutation abbreviation handle
 	if isToken(stream, "ABBREV") {
 		stream.popAny()
 		datum, err := parseDatum(stream)
@@ -277,7 +277,7 @@ func parseExpression(stream *TokenStream) (AstNode, error) {
 			return nil, err
 		}
 		return &QuoteNode{datum: datum}, nil
-		//do rest of keywords
+		//handle rest of keywords
 	} else if isToken(stream, "LAMBDA") {
 		return parseLambda(stream)
 	} else if isToken(stream, "IF") {
@@ -302,6 +302,7 @@ func parseExpression(stream *TokenStream) (AstNode, error) {
 	}
 }
 
+// consumes one literal or identifier and constructs its AST node
 func parseConstantOrIdentifier(stream *TokenStream) (AstNode, error) {
 	tok := stream.Peek()
 
@@ -333,6 +334,7 @@ func parseConstantOrIdentifier(stream *TokenStream) (AstNode, error) {
 
 }
 
+// distinguishe variable definitions from function shorthand 
 func parseDefine(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "DEFINE"); err != nil {
 		return nil, err
@@ -359,7 +361,7 @@ func parseDefine(stream *TokenStream) (AstNode, error) {
 			return nil, err
 		}
 
-		// Parse body expressions
+		// Parse body expressions , shorthand reqs body
 		var body []AstNode
 		if isToken(stream, "RPAREN") {
 			return nil, formatParseError(stream)
@@ -400,6 +402,7 @@ func parseDefine(stream *TokenStream) (AstNode, error) {
 	}, nil
 }
 
+// parseLambda parses parameter list followed by body expressions Every formal must be an identifier
 func parseLambda(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "LAMBDA"); err != nil {
 		return nil, err
@@ -445,6 +448,7 @@ func parseLambda(stream *TokenStream) (AstNode, error) {
 
 }
 
+// parses the if sequence: a test, consequent, and alternate
 func parseIf(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "IF"); err != nil {
 		return nil, err
@@ -473,6 +477,7 @@ func parseIf(stream *TokenStream) (AstNode, error) {
 
 }
 
+//parses SET's required identifier and the expression assigned to it
 func parseSet(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "SET"); err != nil {
 		return nil, err
@@ -500,6 +505,7 @@ func parseSet(stream *TokenStream) (AstNode, error) {
 
 }
 
+//parses one or more expressions through the form's closing parenthesis
 func parseAnd(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "AND"); err != nil {
 		return nil, err
@@ -525,6 +531,7 @@ func parseAnd(stream *TokenStream) (AstNode, error) {
 
 }
 
+// parses one or more expressions through the forms closing parenthesis
 func parseOr(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "OR"); err != nil {
 		return nil, err
@@ -550,6 +557,7 @@ func parseOr(stream *TokenStream) (AstNode, error) {
 
 }
 
+//parses one or more expressions into a BeginNode.
 func parseBegin(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "BEGIN"); err != nil {
 		return nil, err
@@ -574,6 +582,7 @@ func parseBegin(stream *TokenStream) (AstNode, error) {
 	return &BeginNode{exprs: exprs}, nil
 }
 
+// parses one or more clauses w/parenthesis
 func parseCond(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "COND"); err != nil {
 		return nil, err
@@ -616,6 +625,8 @@ func parseCond(stream *TokenStream) (AstNode, error) {
 	return &CondNode{conditions: conditions}, nil
 
 }
+
+// parses one or more bindings followed by  body expressions
 
 func parseLet(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "LET"); err != nil {
@@ -682,6 +693,8 @@ func parseLet(stream *TokenStream) (AstNode, error) {
 
 }
 
+// parses a function expression and one expression containing its
+// argument list, then consumes the closing parenthesi
 func parseApply(stream *TokenStream) (AstNode, error) {
 	if err := popToken(stream, "APPLY"); err != nil {
 		return nil, err
@@ -704,6 +717,8 @@ func parseApply(stream *TokenStream) (AstNode, error) {
 	return &ApplyNode{function: fn, args: args}, nil
 
 }
+
+// parses the default application form. 1st expression is operator, rest are operands
 func parseCall(stream *TokenStream) (AstNode, error) {
 	var exprs []AstNode
 	if isToken(stream, "RPAREN") {
@@ -725,20 +740,21 @@ func parseCall(stream *TokenStream) (AstNode, error) {
 
 }
 
+// parses quoted data  
 func parseDatum(stream *TokenStream) (AstNode, error) {
-	// <constant>
+	// Constants keep their ordinary value nodes when used as data
 	if isConstant(stream) {
 		return parseConstant(stream)
 	}
 
-	// <symbol>
+	// In datum position, an identifier names a symbol rather than a variable
 	if isToken(stream, "IDENTIFIER") {
 		tok := stream.Peek()
 		stream.PopAny()
 		return &SymbolNode{name: tok.Text}, nil
 	}
 
-	// <list> or <cons>
+	// Parenthesized data is empty, a dotted pair, or a  list
 	if isToken(stream, "LPAREN") {
 		stream.PopAny()
 
@@ -765,7 +781,7 @@ func parseDatum(stream *TokenStream) (AstNode, error) {
 			return &ConsNode{car: first, cdr: cdr}, nil
 		}
 
-		// <list> LPAREN <datum>* RPAREN
+		// get the proper list before converting it to linked cons cells.
 		var datums []AstNode
 		datums = append(datums, first)
 
@@ -788,7 +804,7 @@ func parseDatum(stream *TokenStream) (AstNode, error) {
 		return result, nil
 	}
 
-	// <vector> VEC <datum>* RPAREN
+	// Vector elements are datums and continue until the closing parenthesis
 	if isToken(stream, "VEC") {
 		stream.PopAny()
 		var items []AstNode
@@ -809,16 +825,19 @@ func parseDatum(stream *TokenStream) (AstNode, error) {
 
 }
 
+// delegate node construction to the shared  parser
 func parseConstant(stream *TokenStream) (AstNode, error) {
 	return parseConstantOrIdentifier(stream)
 }
 
+// check if next token is literal value
 func isConstant(stream *TokenStream) bool {
 	tok := stream.Peek()
 	return tok.Type == TOK_INT || tok.Type == TOK_DBL || tok.Type == TOK_BOOL ||
 		tok.Type == TOK_STR || tok.Type == TOK_CHAR
 }
 
+// compare next token to readable token name
 func isToken(stream *TokenStream, tokenType string) bool {
 	if !stream.HasNext() {
 		return false
@@ -838,10 +857,12 @@ func isToken(stream *TokenStream, tokenType string) bool {
 	return ok && stream.Peek().Type == typeID
 }
 
+// check for eof
 func isEOF(stream *TokenStream) bool {
 	return isToken(stream, "EOF")
 }
 
+// consume token
 func popToken(stream *TokenStream, expected string) error {
 	if !isToken(stream, expected) {
 		return formatParseError(stream)
@@ -850,6 +871,7 @@ func popToken(stream *TokenStream, expected string) error {
 	return nil
 }
 
+// error formatting to match test cases
 func formatParseError(stream *TokenStream) error {
 	if stream.HasNext() {
 		tok := stream.Peek()
@@ -858,14 +880,16 @@ func formatParseError(stream *TokenStream) error {
 	return ParseError{msg: "Parse Error: EOF"}
 }
 
+// check for unread token
 func (t *TokenStream) HasNext() bool {
 	return t.next < len(t.tokens)
 }
-
+//return current token
 func (t *TokenStream) Peek() Token {
 	return t.nextToken()
 }
 
+//consumes the current token without checking its type.
 func (t *TokenStream) PopAny() {
 	t.popAny()
 }
