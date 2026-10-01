@@ -13,5 +13,29 @@
 ;; provided by gsi.
 ;; TODO: implement this function
 (define (substring-wildcard source pattern)
-  #f ;; [CSE 262] Implement Me!
-)
+    (let ((slen (string-length source))
+        (plen (string-length pattern)))
+
+    ;; Checks whether pattern lines up with source starting at start
+    (define (matches-at? start i)
+      (cond ((= i plen) #t)  ; every pattern char matched, so it's a hit
+            ;;i literally just copy and pasted my contains substring code and added a case for ?
+             ((char=? (string-ref pattern i) #\?)
+             (matches-at? start (+ i 1)))
+
+
+            ;; Compare single characters with char=? 
+            ((char=? (string-ref source (+ start i))
+                     (string-ref pattern i))
+             (matches-at? start (+ i 1)))
+            ;; First mismatch bail out early
+            (else #f)))
+
+    ;; Slides the pattern across source one position at a time
+    (define (try start)
+      ;; Stop once fewer than plen characters remain as a match cant fit
+      (cond ((> (+ start plen) slen) #f)
+            ((matches-at? start 0) #t)
+            (else (try (+ start 1)))))
+    (try 0)))
+
