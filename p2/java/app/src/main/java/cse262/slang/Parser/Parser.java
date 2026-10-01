@@ -74,6 +74,7 @@ public class Parser {
      *
      * @return A list of AstNodes
      */
+    // parses the whole token stream into a list of top level expressions
     public List<AstNodes.AstNode> parse(TokenStream tokens) throws ParseError {
         this.stream = tokens;
         List<AstNodes.AstNode> results = new ArrayList<>();
@@ -84,6 +85,7 @@ public class Parser {
         return results;
 
     }
+    // decides which kind of expression is next and calls the matching parser
     private AstNodes.AstNode parseExpression() throws ParseError{
         if (peek(Tokens.Abbrev.class)) {
             stream.popAny();
@@ -96,13 +98,13 @@ public class Parser {
             return parseConstantOrIdentifier();
         }
         
-        // Everything else starts with LPAREN
+        // everything else starts with LPAREN
         if (!peek(Tokens.LeftParen.class)) {
             throw new ParseError(stream);
         }
         stream.popAny();  // consume LPAREN
         
-        // Check which special form or call
+        // check which special form or call
         if (peek(Tokens.Define.class)) {
             return parseDefine();
         } else if (peek(Tokens.Quote.class)) {
@@ -134,6 +136,7 @@ public class Parser {
         }
     }
 
+    // reads a literal value or variable name and turns it into an AST node
     private AstNodes.AstNode parseConstantOrIdentifier() throws ParseError {
         Tokens.Token t = stream.nextToken();
 
@@ -165,11 +168,12 @@ public class Parser {
         }
         throw new ParseError(stream);
     }
+    // parses a define form, either a variable definition or a function definition
     private AstNodes.AstNode parseDefine() throws ParseError{
         stream.popToken(Tokens.Define.class);
         //check if function is shorthand or simple define
         if (peek(Tokens.LeftParen.class)){
-            //Functino shorthand: (DEFINE ( name args .. . .)body .. .)
+            //functino shorthand: (DEFINE ( name args .. . .)body .. .)
             stream.popAny(); //consume Lparen
             List<AstNodes.Identifier> names = new ArrayList<>();
             if (peek(Tokens.RightParen.class)) {
@@ -200,7 +204,7 @@ public class Parser {
         stream.popToken(Tokens.RightParen.class);
         return new AstNodes.DefineFunc(names, body);
     }else{
-        //Simple define: DEFINE name value
+        //simple define: DEFINE name value
         Tokens.Token name = stream.nextToken();
         if (!(name instanceof Tokens.Identifier)){
             throw new ParseError(stream);
@@ -212,11 +216,11 @@ public class Parser {
 
     }
     }
-    //time to parse specific expressions
+    // parses a lambda by reading its parameter list and body expressions
     private AstNodes.AstNode parseLambda() throws ParseError {
         stream.popToken(Tokens.Lambda.class);
         
-        // Parse formals: (id* )
+        // parse formals: (id* )
         stream.popToken(Tokens.LeftParen.class);
         List<AstNodes.Identifier> params = new ArrayList<>();
         while (!peek(Tokens.RightParen.class)) {
@@ -229,7 +233,7 @@ public class Parser {
         }
         stream.popToken(Tokens.RightParen.class);
         
-        // Parse body
+        // parse body
         List<AstNodes.AstNode> body = new ArrayList<>();
         if (peek(Tokens.RightParen.class)) {
             throw new ParseError(stream);
@@ -242,8 +246,7 @@ public class Parser {
         return new AstNodes.LambdaDef(params, body);
     }
 
-    //IF <expression> <expression> <expression>
-
+    // parses an if expression with a test, then, and else branch
     private AstNodes.AstNode parseIf() throws ParseError {
         stream.popToken(Tokens.If.class);
         AstNodes.AstNode test = parseExpression();
@@ -252,7 +255,8 @@ public class Parser {
         stream.popToken(Tokens.RightParen.class);
         return new AstNodes.If(test, consequent, alternate);
     }
-    //set <identifier> <expression>
+  
+    // parses a set expression that updates an existing variable
     private AstNodes.AstNode parseSet() throws ParseError{
         stream.popToken(Tokens.Set.class);
         Tokens.Token name = stream.nextToken();
@@ -265,7 +269,7 @@ public class Parser {
         return new AstNodes.Set(new AstNodes.Identifier(((Tokens.Identifier) name).tokenText), value);
 
     }
-    //and expression
+    // parses an and expression by reading each condition expression in order
     private AstNodes.AstNode parseAnd() throws ParseError {
         stream.popToken(Tokens.And.class);
         List<AstNodes.AstNode> exprs = new ArrayList<>();
@@ -280,7 +284,7 @@ public class Parser {
         return new AstNodes.And(exprs);
     }
 
-    //or expression
+    // parses an or expression by reading each expression in the or list
     private AstNodes.AstNode parseOr() throws ParseError {
         stream.popToken(Tokens.Or.class);
         List<AstNodes.AstNode> exprs = new ArrayList<>();
@@ -293,8 +297,7 @@ public class Parser {
         stream.popToken(Tokens.RightParen.class);
         return new AstNodes.Or(exprs);
     }
-    //begin expression
-
+    // parses a begin block by collecting all expressions inside it
      private AstNodes.AstNode parseBegin() throws ParseError {
         stream.popToken(Tokens.Begin.class);
         List<AstNodes.AstNode> exprs = new ArrayList<>();
@@ -307,7 +310,7 @@ public class Parser {
         stream.popToken(Tokens.RightParen.class);
         return new AstNodes.Begin(exprs);
     }
-    // cond 
+    // parses a cond form by reading each condition clause and its action list
     private AstNodes.AstNode parseCond() throws ParseError {
         stream.popToken(Tokens.Cond.class);
         List<AstNodes.Cond.Condition> conditions = new ArrayList<>();
@@ -329,11 +332,11 @@ public class Parser {
         stream.popToken(Tokens.RightParen.class);
         return new AstNodes.Cond(conditions);
     }
-    //let 
+    // parses a let expression by reading name/value bindings and then the body
      private AstNodes.AstNode parseLet() throws ParseError {
         stream.popToken(Tokens.Let.class);
         
-        // Parse bindings
+        // parse bindings
         stream.popToken(Tokens.LeftParen.class);
         List<AstNodes.Let.LetDef> bindings = new ArrayList<>();
         if (peek(Tokens.RightParen.class)) {
@@ -356,7 +359,7 @@ public class Parser {
         }
         stream.popToken(Tokens.RightParen.class);
         
-        // Parse body
+        // parse body
         List<AstNodes.AstNode> body = new ArrayList<>();
         if (peek(Tokens.RightParen.class)) {
             throw new ParseError(stream);
@@ -368,8 +371,7 @@ public class Parser {
         
         return new AstNodes.Let(bindings, body);
     }
-    //apply
-
+    // parses the apply form by reading the function and the argument list
     private AstNodes.AstNode parseApply() throws ParseError {
         stream.popToken(Tokens.Apply.class);
         AstNodes.AstNode func = parseExpression();
@@ -377,7 +379,7 @@ public class Parser {
         stream.popToken(Tokens.RightParen.class);
         return new AstNodes.Apply(func, args);
     }
-    //call
+    // parses a normal function call as a list of expressions inside parentheses
     private AstNodes.AstNode parseCall() throws ParseError {
         List<AstNodes.AstNode> exprs = new ArrayList<>();
         if (peek(Tokens.RightParen.class)) {
@@ -398,20 +400,21 @@ public class Parser {
 
 
 
+  // parses a quoted datum, including lists, symbols, vectors, and constants
   private AstNodes.Datum parseDatum() throws ParseError {
 
         if (isConstant()) {
             return (AstNodes.Datum) parseConstantOrIdentifier();
         }
         
-  
+        //parse identifier
         if (peek(Tokens.Identifier.class)) {
             Tokens.Token t = stream.nextToken();
             stream.popAny();
             return new AstNodes.Symbol(((Tokens.Identifier) t).tokenText);
         }
         
-   
+        //parse datum, checking for parens first
         if (peek(Tokens.LeftParen.class)) {
             stream.popAny();
             
@@ -422,7 +425,7 @@ public class Parser {
             
             List<AstNodes.Datum> datums = new ArrayList<>();
             datums.add(parseDatum());
-            
+            //parse dot
             if (peek(Tokens.Dot.class)) {
 
                 stream.popAny();
@@ -439,7 +442,7 @@ public class Parser {
             }
         }
         
-      
+        //parse vectors
         if (peek(Tokens.Vec.class)) {
             stream.popAny();
             List<AstNodes.Datum> datums = new ArrayList<>();
@@ -454,23 +457,24 @@ public class Parser {
     }
 
 
-
+    // checks whether the next token is int or dbl or bool or str or char
     private boolean isConstant() {
         return peek(Tokens.Int.class) || peek(Tokens.Dbl.class) || peek(Tokens.Bool.class) 
             || peek(Tokens.Str.class) || peek(Tokens.Char.class);
     }
 
-
+    // looks at the next token without consuming it
     private boolean peek(Class<?> type){
         return hasNext() && type.isInstance(stream.nextToken());
     }
 
 
-
+    // returns true when the stream has reached EOF
     private boolean isEOF(){
         return peek(Tokens.Eof.class);
     }
 
+    // checks whether there are tokens left to read in the stream
     private boolean hasNext(){
         return stream.hasNext();
     }
