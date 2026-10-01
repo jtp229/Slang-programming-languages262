@@ -11,5 +11,12 @@
 ;; (fib 10) ; returns 55
 ;; TODO: implement this function
 (define (fib n)
-  #f ;; [CSE 262] Implement Me!
-)
+  ;;count up from 0 and carry two most recent fib args
+  ;;  a = fib(i) and b = fib(i+1).
+  (define (iter i a b)
+    (if (= i n)
+        a  ;; a is fib(i), and i has reached n, so this is our answer
+        ;; slide the window forward one position: the old b becomes the new a
+        (iter (+ i 1) b (+ a b))))
+
+  (iter 0 0 1))
