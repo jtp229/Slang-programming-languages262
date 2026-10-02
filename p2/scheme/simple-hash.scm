@@ -31,5 +31,58 @@
 ;; this file should be `make-hash`.
 ;; TODO: implement this function
 (define (make-hash size)
-  #f ;; [CSE 262] Implement Me!
-)
+  ;; The bucket vector is the hash set's only state. Each slot holds a list
+  ;; of the strings that hashed to that slot. It lives in this let, so only
+  ;; the dispatch function we return can touch it, and make-hash stays the
+  ;; only global symbol.
+  (let ((buckets (make-vector size '())))
+    (define (hash-string str)
+      (let ((len (string-length str)))
+        (define (iter i h)
+          (if (= i len)
+              h
+              (iter (+ i 1)
+                    (modulo (+ (* h 33) (char->integer (string-ref str i)))
+                            size))))
+        (iter 0 (modulo 5381 size))))
+
+    ;; check if str is in bucket list
+    (define (member? str lst)
+      (cond ((null? lst) #f)
+            ((string=? str (car lst)) #t)
+            (else (member? str (cdr lst)))))
+
+    ;; returns a copy of lst without str
+    ;;only call after member? so dropping first match is enough
+    (define (remove-from str lst)
+      (cond ((null? lst) '())
+            ((string=? str (car lst)) (cdr lst))
+            (else (cons (car lst) (remove-from str (cdr lst))))))
+
+    ;; the method receiver, hash once per call and reuse index
+    (define (dispatch op str)
+      (let* ((idx (hash-string str))
+             (bucket (vector-ref buckets idx)))
+        (cond
+          ((eq? op 'contains)
+           (member? str bucket))
+
+          ;; insert only if absent so set doesnt duplicate
+          ((eq? op 'insert)
+           (if (member? str bucket)
+               #f
+               (begin
+                 (vector-set! buckets idx (cons str bucket))
+                 #t)))
+
+          ;; remove only if present, return #f if nothing to remove
+          ((eq? op 'remove)
+           (if (member? str bucket)
+               (begin
+                 (vector-set! buckets idx (remove-from str bucket))
+                 #t)
+               #f))
+
+          ;; fail message on typo instead of silently returning
+          (else (error "unknown operation:" op)))))
+    dispatch))
