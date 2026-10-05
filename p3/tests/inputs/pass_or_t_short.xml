@@ -1,0 +1,8 @@
+<Ast xmlns="ast">
+ <Or>
+  <Int val="1"/>
+  <Call>
+   <Identifier val="explode"/>
+  </Call>
+ </Or>
+</Ast>

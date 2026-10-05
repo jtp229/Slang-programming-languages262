@@ -1,0 +1,34 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="sum-pos"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="x"/>
+     <Int val="0"/>
+    </Call>
+    <Int val="0"/>
+    <Call>
+     <Identifier val="+"/>
+     <Identifier val="x"/>
+     <Call>
+      <Identifier val="sum-pos"/>
+      <Call>
+       <Identifier val="+"/>
+       <Identifier val="x"/>
+       <Int val="-1"/>
+      </Call>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="sum-pos"/>
+  <Int val="100000"/>
+ </Call>
+</Ast>

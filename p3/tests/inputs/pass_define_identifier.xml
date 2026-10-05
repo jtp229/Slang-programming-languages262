@@ -1,0 +1,11 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="x"/>
+  <Int val="10"/>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="y"/>
+  <Identifier val="x"/>
+ </DefineVar>
+ <Identifier val="y"/>
+</Ast>

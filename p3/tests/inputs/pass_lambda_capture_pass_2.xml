@@ -1,0 +1,34 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="capture"/>
+  <Lambda>
+   <Formals>
+    <Identifier val="x"/>
+   </Formals>
+   <Expressions>
+    <Lambda>
+     <Formals>
+      <Identifier val="y"/>
+     </Formals>
+     <Expressions>
+      <And>
+       <Identifier val="x"/>
+       <Identifier val="y"/>
+      </And>
+     </Expressions>
+    </Lambda>
+   </Expressions>
+  </Lambda>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="passing"/>
+  <Call>
+   <Identifier val="capture"/>
+   <Bool val="true"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="passing"/>
+  <Bool val="false"/>
+ </Call>
+</Ast>

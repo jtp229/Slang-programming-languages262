@@ -1,0 +1,32 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="myvar"/>
+  <Int val="10"/>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="myfunc"/>
+  <Lambda>
+   <Formals>
+    <Identifier val="myvar"/>
+   </Formals>
+   <Expressions>
+    <Lambda>
+     <Formals/>
+     <Expressions>
+      <Identifier val="myvar"/>
+     </Expressions>
+    </Lambda>
+   </Expressions>
+  </Lambda>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="scopetest"/>
+  <Call>
+   <Identifier val="myfunc"/>
+   <Int val="11"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="scopetest"/>
+ </Call>
+</Ast>

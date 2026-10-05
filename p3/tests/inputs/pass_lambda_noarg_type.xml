@@ -1,0 +1,12 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="ten"/>
+  <Lambda>
+   <Formals/>
+   <Expressions>
+    <Int val="10"/>
+   </Expressions>
+  </Lambda>
+ </DefineVar>
+ <Identifier val="ten"/>
+</Ast>

@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Or>
+  <Bool val="false"/>
+  <Bool val="false"/>
+ </Or>
+</Ast>
