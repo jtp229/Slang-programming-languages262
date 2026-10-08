@@ -13,6 +13,47 @@ def interpret_ast(in_expr, in_env):
 
     @return The result of the interpretation (a value)
     """
+    node_type = in_expr["type"]
+    
+    # Handle constants
+    if node_type == AST_BOOL_TRUE:
+        return makeBoolTrueVal()
+    elif node_type == AST_BOOL_FALSE:
+        return makeBoolFalseVal()
+    elif node_type == AST_INT:
+        return makeIntVal(in_expr["val"])
+    elif node_type == AST_DBL:
+        return makeDblVal(in_expr["val"])
+    elif node_type == AST_STR:
+        return makeStrVal(in_expr["val"])
+    elif node_type == AST_CHAR:
+        return makeCharVal(in_expr["val"])
+    elif node_type == AST_SYMBOL:
+        return makeSymbolVal(in_expr["val"])
+    elif node_type == AST_EMPTY_CONS:
+        return makeEmptyVal()
+
+    # Handle data structures
+    elif node_type == AST_CONS:
+        car_val = interpret_ast(in_expr["car"], in_env)
+        if isErrorVal(car_val):
+            return car_val
+        cdr_val = interpret_ast(in_expr["cdr"], in_env)
+        if isErrorVal(cdr_val):
+            return cdr_val
+        return makeConsVal(car_val, cdr_val)
+    
+    elif node_type == AST_VEC:
+        items = []
+        for item in in_expr["items"]:
+            val = interpret_ast(item, in_env)
+            if isErrorVal(val):
+                return val
+            items.append(val)
+        return makeVectorVal(items)
+    
+
+
 
     return makeErrorVal("interpret_ast is not implemented")
 
@@ -65,3 +106,20 @@ def val_to_scheme(val):
         l = val_to_scheme(val["car"])
         r = val_to_scheme(val["cdr"])
         return f"({l} . {r})"
+
+#functions
+
+def callFunction(func_val, args, in_env):
+
+def isErrorVal(val):
+     #check if value is error value
+     return val["type"] == VAL_ERROR
+
+def isTruthy(val):
+    #determine if value is true in slang
+    return val["type"] != VAL_FALSE
+
+def consToArray(cons_val):
+
+
+
