@@ -1,4 +1,4 @@
-from astnodes import makeLambdaDefNode
+from astnodes import *
 import astnodes
 import slang_env
 from values import *
@@ -52,6 +52,7 @@ def interpret_ast(in_expr, in_env):
             items.append(val)
         return makeVectorVal(items)
     
+    
 
 
 
@@ -101,15 +102,60 @@ def val_to_scheme(val):
     elif val["type"] == VAL_ERROR:
         return val["msg"]
     elif val["type"] == VAL_CONS:
-        #  TODO:  Right now, we print CONS cells in the most naive way. Consider
-        #         alternatives that are more pretty for lists??
         l = val_to_scheme(val["car"])
         r = val_to_scheme(val["cdr"])
         return f"({l} . {r})"
+    else:
+        return f"<unknown value type: {val['type']}>"
 
 #functions
 
 def callFunction(func_val, args, in_env):
+    if isErrorVal(func_val):
+        return func_val
+    
+    if func_val["type"] == VAL_BUILTIN:
+        # call the builtin function with the stored func
+        return func_val["func"](args)
+    
+    elif func_val["type"] == VAL_LAMBDA:
+        # extract the lambda definition and closure environment
+        lambda_func = func_val["func"]
+        closure_env = func_val["env"]
+        
+        # get the formal parameter names and body
+        if lambda_func["type"] == AST_LAMBDA_DEF:
+            formals = lambda_func["formals"]
+            body = lambda_func["exprs"]
+        elif lambda_func["type"] == AST_DEFINE_FUNC:
+            formals = lambda_func["ids"][1:]  # skip function name
+            body = lambda_func["body"]
+        else:
+            return makeErrorVal("Run-time Error: Invalid lambda")
+        
+        # check argument count
+        if len(args) != len(formals):
+            return makeErrorVal(f"Run-time Error: Expected {len(formals)} arguments, got {len(args)}")
+        
+        # create new environment extending the closure
+        lambda_env = slang_env.makeInnerEnv(closure_env)
+        
+        # bind formals to arguments
+        for i, formal in enumerate(formals):
+            lambda_env.put(formal, args[i])
+        
+        # evaluate body (sequence of expressions)
+        result = makeEmptyVal()
+        for expr in body:
+            result = interpret_ast(expr, lambda_env)
+            if isErrorVal(result):
+                return result
+        
+        return result
+    
+    else:
+        return makeErrorVal(f"Run-time Error: Cannot call {func_val['type']}")
+
 
 def isErrorVal(val):
      #check if value is error value
@@ -120,6 +166,17 @@ def isTruthy(val):
     return val["type"] != VAL_FALSE
 
 def consToArray(cons_val):
+    result = []
+    current = cons_val
+    
+    while current["type"] == VAL_CONS:
+        result.append(current["car"])
+        current = current["cdr"]
+    
+    if current["type"] == VAL_EMPTY:
+        return result
+    else:
+        return None  # Not a proper list
 
 
 
