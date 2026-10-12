@@ -53,6 +53,7 @@ def interpret_ast(in_expr, in_env):
         return makeVectorVal(items)
     
     
+    
 
 
 
@@ -102,9 +103,17 @@ def val_to_scheme(val):
     elif val["type"] == VAL_ERROR:
         return val["msg"]
     elif val["type"] == VAL_CONS:
-        l = val_to_scheme(val["car"])
-        r = val_to_scheme(val["cdr"])
-        return f"({l} . {r})"
+        # check if this is a proper list
+        items = consToArray(val)
+        if items is not None:
+            # if it is proper list print nicely
+            item_strs = [val_to_scheme(item) for item in items]
+            return "(" + " ".join(item_strs) + ")"
+        else:
+            # if it is improper list use dot notation
+            l = val_to_scheme(val["car"])
+            r = val_to_scheme(val["cdr"])
+            return f"({l} . {r})"
     else:
         return f"<unknown value type: {val['type']}>"
 
