@@ -1,7 +1,14 @@
 from astnodes import *
-import astnodes
 import slang_env
 from values import *
+
+
+def id_name(node):
+
+   # Extract a variable name string from an Identifier AST node or a bare string
+    if isinstance(node, dict) and "id" in node and node.get("type") == AST_IDENTIFIER:
+        return node["id"]
+    return node
 
 
 def interpret_ast(in_expr, in_env):
@@ -13,51 +20,229 @@ def interpret_ast(in_expr, in_env):
 
     @return The result of the interpretation (a value)
     """
-    node_type = in_expr["type"]
-    
-    # Handle constants
-    if node_type == AST_BOOL_TRUE:
-        return makeBoolTrueVal()
-    elif node_type == AST_BOOL_FALSE:
-        return makeBoolFalseVal()
-    elif node_type == AST_INT:
-        return makeIntVal(in_expr["val"])
-    elif node_type == AST_DBL:
-        return makeDblVal(in_expr["val"])
-    elif node_type == AST_STR:
-        return makeStrVal(in_expr["val"])
-    elif node_type == AST_CHAR:
-        return makeCharVal(in_expr["val"])
-    elif node_type == AST_SYMBOL:
-        return makeSymbolVal(in_expr["val"])
-    elif node_type == AST_EMPTY_CONS:
-        return makeEmptyVal()
+    expr = in_expr
+    env = in_env
 
-    # Handle data structures
-    elif node_type == AST_CONS:
-        car_val = interpret_ast(in_expr["car"], in_env)
-        if isErrorVal(car_val):
-            return car_val
-        cdr_val = interpret_ast(in_expr["cdr"], in_env)
-        if isErrorVal(cdr_val):
-            return cdr_val
-        return makeConsVal(car_val, cdr_val)
-    
-    elif node_type == AST_VEC:
-        items = []
-        for item in in_expr["items"]:
-            val = interpret_ast(item, in_env)
+    while True:
+        node_type = expr["type"]
+
+        # Handle constants
+        if node_type == AST_BOOL_TRUE:
+            return makeBoolTrueVal()
+        elif node_type == AST_BOOL_FALSE:
+            return makeBoolFalseVal()
+        elif node_type == AST_INT:
+            return makeIntVal(expr["val"])
+        elif node_type == AST_DBL:
+            return makeDblVal(expr["val"])
+        elif node_type == AST_STR:
+            return makeStrVal(expr["val"])
+        elif node_type == AST_CHAR:
+            return makeCharVal(expr["val"])
+        elif node_type == AST_SYMBOL:
+            return makeSymbolVal(expr["val"])
+        elif node_type == AST_EMPTY_CONS:
+            return makeEmptyVal()
+
+        # handle data structures
+        elif node_type == AST_CONS:
+            car_val = interpret_ast(expr["car"], env)
+            if isErrorVal(car_val):
+                return car_val
+            cdr_val = interpret_ast(expr["cdr"], env)
+            if isErrorVal(cdr_val):
+                return cdr_val
+            return makeConsVal(car_val, cdr_val)
+
+        elif node_type == AST_VEC:
+            items = []
+            for item in expr["items"]:
+                val = interpret_ast(item, env)
+                if isErrorVal(val):
+                    return val
+                items.append(val)
+            return makeVectorVal(items)
+
+        # handle identifier lookup
+        elif node_type == AST_IDENTIFIER:
+            return env.get(expr["id"])
+
+        # QUOTE / TICK: evaluate the datum (tail)
+        elif node_type == AST_QUOTE or node_type == AST_TICK:
+            expr = expr["datum"]
+            continue
+
+        # DEFINE: as a variable (define id expr)
+        elif node_type == AST_DEFINE_VAR:
+            val = interpret_ast(expr["expr"], env)
             if isErrorVal(val):
                 return val
-            items.append(val)
-        return makeVectorVal(items)
-    
-    
-    
+            env.put(id_name(expr["id"]), val)
+            return val
+
+        # DEFINE: as a function (define (id+) expr+)
+        elif node_type == AST_DEFINE_FUNC:
+            lambda_val = makeLambdaVal(env, expr)
+            env.put(id_name(expr["ids"][0]), lambda_val)
+            return lambda_val
+
+        # LAMBDA: (lambda (id*) expr+)
+        elif node_type == AST_LAMBDA_DEF:
+            return makeLambdaVal(env, expr)
+
+        # IF: (if test consequent alternate) — branch is tail
+        elif node_type == AST_IF:
+            test_val = interpret_ast(expr["cond"], env)
+            if isErrorVal(test_val):
+                return test_val
+            expr = expr["if_true"] if isTruthy(test_val) else expr["if_false"]
+            continue
+
+        # AND: (and expr+) — last expr is tail
+        elif node_type == AST_AND:
+            exprs = expr["exprs"]
+            for e in exprs[:-1]:
+                result = interpret_ast(e, env)
+                if isErrorVal(result):
+                    return result
+                if not isTruthy(result):
+                    return result
+            if not exprs:
+                return makeBoolTrueVal()
+            expr = exprs[-1]
+            continue
+
+        # OR: (or expr+) — last expr is tail
+        elif node_type == AST_OR:
+            exprs = expr["exprs"]
+            for e in exprs[:-1]:
+                result = interpret_ast(e, env)
+                if isErrorVal(result):
+                    return result
+                if isTruthy(result):
+                    return result
+            if not exprs:
+                return makeBoolFalseVal()
+            expr = exprs[-1]
+            continue
+
+        # BEGIN: (begin expr+) — last expr is tail
+        elif node_type == AST_BEGIN:
+            result = eval_prefix(expr["exprs"], env)
+            if result is not None:
+                return result
+            expr = expr["exprs"][-1]
+            continue
+
+        # COND: (cond (test expr+)+) 
+        elif node_type == AST_COND:
+            matched = None
+            for condition in expr["conditions"]:
+                test_val = interpret_ast(condition["test"], env)
+                if isErrorVal(test_val):
+                    return test_val
+                if isTruthy(test_val):
+                    matched = condition["exprs"]
+                    break
+            if matched is None:
+                return makeErrorVal("Run-time Error: No true condition in cond")
+            result = eval_prefix(matched, env)
+            if result is not None:
+                return result
+            expr = matched[-1]
+            continue
+
+        # LET: (let ((id expr)+) expr+) — body last expr is tail
+        elif node_type == AST_LET:
+            let_env = slang_env.makeInnerEnv(env)
+            for binding in expr["vars"]:
+                val = interpret_ast(binding["val"], env)
+                if isErrorVal(val):
+                    return val
+                let_env.put(id_name(binding["id"]), val)
+            result = eval_prefix(expr["body"], let_env)
+            if result is not None:
+                return result
+            expr = expr["body"][-1]
+            env = let_env
+            continue
+
+        # SET!: (set! id expr)
+        elif node_type == AST_SET:
+            val = interpret_ast(expr["expr"], env)
+            if isErrorVal(val):
+                return val
+            env.update(id_name(expr["id"]), val)
+            return val
+
+        # APPLY: (apply func args)
+        elif node_type == AST_APPLY:
+            func_val = interpret_ast(expr["func"], env)
+            if isErrorVal(func_val):
+                return func_val
+            args_val = interpret_ast(expr["args"], env)
+            if isErrorVal(args_val):
+                return args_val
+            args = consToArray(args_val)
+            if args is None:
+                return makeErrorVal("Run-time Error: apply arguments must be a list")
+
+        # CALL (func arg+)
+        elif node_type == AST_CALL:
+            func_val = interpret_ast(expr["exprs"][0], env)
+            if isErrorVal(func_val):
+                return func_val
+            args = []
+            for i in range(1, len(expr["exprs"])):
+                arg_val = interpret_ast(expr["exprs"][i], env)
+                if isErrorVal(arg_val):
+                    return arg_val
+                args.append(arg_val)
+
+        else:
+            return makeErrorVal(f"Run-time Error: Unknown AST node type: {node_type}")
+
+        if node_type in (AST_CALL, AST_APPLY):
+            if func_val["type"] == VAL_BUILTIN:
+                return func_val["func"](args)
+            if func_val["type"] != VAL_LAMBDA:
+                return makeErrorVal(f"Run-time Error: Cannot call {func_val['type']}")
+
+            lambda_func = func_val["func"]
+            if lambda_func["type"] == AST_LAMBDA_DEF:
+                formals = [id_name(f) for f in lambda_func["formals"]]
+                body = lambda_func["exprs"]
+            elif lambda_func["type"] == AST_DEFINE_FUNC:
+                formals = [id_name(f) for f in lambda_func["ids"][1:]]
+                body = lambda_func["body"]
+            else:
+                return makeErrorVal("Run-time Error: Invalid lambda")
+
+            if len(args) != len(formals):
+                return makeErrorVal("Run-time Error: Invalid number of arguments")
+
+            lambda_env = slang_env.makeInnerEnv(func_val["env"])
+            for i, formal in enumerate(formals):
+                lambda_env.put(formal, args[i])
+
+            result = eval_prefix(body, lambda_env)
+            if result is not None:
+                return result
+            expr = body[-1]
+            env = lambda_env
+            continue
 
 
-
-    return makeErrorVal("interpret_ast is not implemented")
+def eval_prefix(exprs, env):
+    
+    #Evaluate all but the last expression in a sequence
+    if not exprs:
+        return makeEmptyVal()
+    for e in exprs[:-1]:
+        result = interpret_ast(e, env)
+        if isErrorVal(result):
+            return result
+    return None
 
 
 def val_to_scheme(val):
@@ -103,67 +288,11 @@ def val_to_scheme(val):
     elif val["type"] == VAL_ERROR:
         return val["msg"]
     elif val["type"] == VAL_CONS:
-        # check if this is a proper list
-        items = consToArray(val)
-        if items is not None:
-            # if it is proper list print nicely
-            item_strs = [val_to_scheme(item) for item in items]
-            return "(" + " ".join(item_strs) + ")"
-        else:
-            # if it is improper list use dot notation
-            l = val_to_scheme(val["car"])
-            r = val_to_scheme(val["cdr"])
-            return f"({l} . {r})"
+        l = val_to_scheme(val["car"])
+        r = val_to_scheme(val["cdr"])
+        return f"({l} . {r})"
     else:
         return f"<unknown value type: {val['type']}>"
-
-#functions
-
-def callFunction(func_val, args, in_env):
-    if isErrorVal(func_val):
-        return func_val
-    
-    if func_val["type"] == VAL_BUILTIN:
-        # call the builtin function with the stored func
-        return func_val["func"](args)
-    
-    elif func_val["type"] == VAL_LAMBDA:
-        # extract the lambda definition and closure environment
-        lambda_func = func_val["func"]
-        closure_env = func_val["env"]
-        
-        # get the formal parameter names and body
-        if lambda_func["type"] == AST_LAMBDA_DEF:
-            formals = lambda_func["formals"]
-            body = lambda_func["exprs"]
-        elif lambda_func["type"] == AST_DEFINE_FUNC:
-            formals = lambda_func["ids"][1:]  # skip function name
-            body = lambda_func["body"]
-        else:
-            return makeErrorVal("Run-time Error: Invalid lambda")
-        
-        # check argument count
-        if len(args) != len(formals):
-            return makeErrorVal(f"Run-time Error: Expected {len(formals)} arguments, got {len(args)}")
-        
-        # create new environment extending the closure
-        lambda_env = slang_env.makeInnerEnv(closure_env)
-        
-        # bind formals to arguments
-        for i, formal in enumerate(formals):
-            lambda_env.put(formal, args[i])
-        
-        # evaluate body (sequence of expressions)
-        result = makeEmptyVal()
-        for expr in body:
-            result = interpret_ast(expr, lambda_env)
-            if isErrorVal(result):
-                return result
-        
-        return result
-    
-    else:
-        return makeErrorVal(f"Run-time Error: Cannot call {func_val['type']}")
 
 
 def isErrorVal(val):
@@ -177,11 +306,11 @@ def isTruthy(val):
 def consToArray(cons_val):
     result = []
     current = cons_val
-    
+
     while current["type"] == VAL_CONS:
         result.append(current["car"])
         current = current["cdr"]
-    
+
     if current["type"] == VAL_EMPTY:
         return result
     else:
