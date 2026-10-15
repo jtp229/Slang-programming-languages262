@@ -288,6 +288,10 @@ def val_to_scheme(val):
     elif val["type"] == VAL_ERROR:
         return val["msg"]
     elif val["type"] == VAL_CONS:
+       # items = consToArray(val)
+       # if items is not None:
+         #   return "(" + " ".join(val_to_scheme(item) for item in items) + ")"
+         #I want to print lists more nicely but if I do I fail 3 tests, so comment this out
         l = val_to_scheme(val["car"])
         r = val_to_scheme(val["cdr"])
         return f"({l} . {r})"

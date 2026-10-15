@@ -3,6 +3,14 @@ use super::values::{Cons, LambdaVal, Value, Vector};
 use crate::parser::ast::{AstNode, AstNodeDetails, Datum, LambdaDefNode};
 use std::{cell::RefCell, rc::Rc};
 
+
+
+
+
+
+fn id_name(node: &str) -> String {
+    node.to_string()
+}
 /// Interpret an AstNode in the context of an Environment
 ///
 /// @param expr The AST node to interpret
@@ -10,7 +18,45 @@ use std::{cell::RefCell, rc::Rc};
 ///
 /// @return The result of the interpretation, or an error message
 pub fn interpret_ast(expr: &AstNode, env: Rc<RefCell<Env>>) -> Result<Value, String> {
-    Err("interpret_ast is not implemented".to_string())
+    loop{
+        let node_type = match &expr.details{
+    //constants
+            AstNodeDetails::BoolTrue => return Ok(Value::BoolTrue),
+            AstNodeDetails::BoolFalse => return Ok(Value::BoolFalse),
+            AstNodeDetails::Int(i) => return Ok(Value::Int(*i)),
+            AstNodeDetails::Dbl(f) => return Ok(Value::Dbl(*f)),
+            AstNodeDetails::Str(s) => return Ok(Value::Str(s.clone())),
+            AstNodeDetails::Char(c) => return Ok(Value::Char(*c)),
+            AstNodeDetails::Symbol(s) => return Ok(Value::Symbol(s.clone())),
+            AstNodeDetails::EmptyCons => return Ok(Value::EmptyCons),
+
+
+    //data structures
+            AstNodeDetails::Cons { car, cdr } => {
+                let car_val = interpret_ast((*car).clone(), env.clone())?;
+                let cdr_val = interpret_ast((*cdr).clone(), env.clone())?;
+                return Ok(Value::Cons(Rc::new(RefCell::new(Cons { 
+                    car: car_val, 
+                    cdr: cdr_val 
+                }))))
+            AstNodeDetails::Vec { items } => {
+                
+            }
+
+
+
+
+
+
+
+        }
+
+
+
+
+    }
+  
+
 }
 
 /// Pretty print a Value
