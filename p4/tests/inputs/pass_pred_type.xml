@@ -1,0 +1,66 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="integer?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="integer?"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="double?"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="double?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="number?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="number?"/>
+  <Dbl val="1.5"/>
+ </Call>
+ <Call>
+  <Identifier val="number?"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="string?"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="string?"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="char?"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="char?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="vector?"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="vector?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="procedure?"/>
+  <Identifier val="car"/>
+ </Call>
+ <Call>
+  <Identifier val="procedure?"/>
+  <Int val="1"/>
+ </Call>
+</Ast>

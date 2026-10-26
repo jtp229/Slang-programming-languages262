@@ -1,0 +1,38 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="integer-&gt;string"/>
+  <Int val="42"/>
+ </Call>
+ <Call>
+  <Identifier val="integer-&gt;string"/>
+  <Int val="-7"/>
+ </Call>
+ <Call>
+  <Identifier val="double-&gt;string"/>
+  <Dbl val="1.5"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="123"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="-7"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="2.5"/>
+ </Call>
+ <Call>
+  <Identifier val="integer-&gt;double"/>
+  <Int val="3"/>
+ </Call>
+ <Call>
+  <Identifier val="double-&gt;integer"/>
+  <Dbl val="3.9"/>
+ </Call>
+ <Call>
+  <Identifier val="double-&gt;integer"/>
+  <Dbl val="-3.9"/>
+ </Call>
+</Ast>

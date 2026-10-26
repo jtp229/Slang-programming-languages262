@@ -1,0 +1,32 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="char-&gt;integer"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="char-&gt;integer"/>
+  <Char val="A"/>
+ </Call>
+ <Call>
+  <Identifier val="integer-&gt;char"/>
+  <Int val="98"/>
+ </Call>
+ <Call>
+  <Identifier val="integer-&gt;char"/>
+  <Int val="65"/>
+ </Call>
+ <Call>
+  <Identifier val="char-&gt;string"/>
+  <Char val="z"/>
+ </Call>
+ <Call>
+  <Identifier val="char-equal?"/>
+  <Char val="a"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="char-equal?"/>
+  <Char val="a"/>
+  <Char val="b"/>
+ </Call>
+</Ast>

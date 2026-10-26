@@ -1,0 +1,13 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Str val="before"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+ </Call>
+ <Call>
+  <Identifier val="display"/>
+  <Str val="after"/>
+ </Call>
+</Ast>

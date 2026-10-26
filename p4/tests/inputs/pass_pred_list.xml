@@ -1,0 +1,57 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="list?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="list?"/>
+  <Call>
+   <Identifier val="list"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="list?"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="list?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="null?"/>
+  <Call>
+   <Identifier val="list"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="null?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="null?"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="symbol?"/>
+  <Symbol val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="symbol?"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="symbol?"/>
+  <Int val="1"/>
+ </Call>
+</Ast>

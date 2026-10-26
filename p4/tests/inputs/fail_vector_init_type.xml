@@ -1,0 +1,15 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Str val="before"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-init"/>
+  <Str val="a"/>
+  <Int val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="display"/>
+  <Str val="after"/>
+ </Call>
+</Ast>

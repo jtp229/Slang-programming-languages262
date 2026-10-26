@@ -1,0 +1,20 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Str val="before"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-set!"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Int val="-1"/>
+  <Int val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="display"/>
+  <Str val="after"/>
+ </Call>
+</Ast>

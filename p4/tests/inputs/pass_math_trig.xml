@@ -1,0 +1,46 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="sin"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="cos"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="tan"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="asin"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="acos"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="atan"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="sinh"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="cosh"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="tanh"/>
+  <Dbl val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="sin"/>
+  <Int val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="cos"/>
+  <Int val="0"/>
+ </Call>
+</Ast>

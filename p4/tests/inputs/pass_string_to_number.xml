@@ -1,0 +1,60 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="-0"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="42"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="-42"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;integer"/>
+  <Str val="007"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="3"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="-3"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="2.5"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="-0.5"/>
+ </Call>
+ <Call>
+  <Identifier val="string-&gt;double"/>
+  <Str val="007.250"/>
+ </Call>
+ <Call>
+  <Identifier val="double?"/>
+  <Call>
+   <Identifier val="string-&gt;double"/>
+   <Str val="3"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="integer?"/>
+  <Call>
+   <Identifier val="string-&gt;integer"/>
+   <Str val="3"/>
+  </Call>
+ </Call>
+</Ast>

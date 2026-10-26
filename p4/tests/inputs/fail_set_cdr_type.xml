@@ -1,0 +1,15 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Str val="before"/>
+ </Call>
+ <Call>
+  <Identifier val="set-cdr!"/>
+  <Str val="a"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="display"/>
+  <Str val="after"/>
+ </Call>
+</Ast>

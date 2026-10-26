@@ -1,0 +1,49 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="vector-init"/>
+  <Int val="3"/>
+  <Int val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-length"/>
+  <Call>
+   <Identifier val="vector-init"/>
+   <Int val="5"/>
+   <Str val="x"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="vector-length"/>
+  <Call>
+   <Identifier val="vector"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="vector"/>
+ </Call>
+ <DefineVar>
+  <Identifier val="v"/>
+  <Call>
+   <Identifier val="vector-init"/>
+   <Int val="2"/>
+   <Int val="1"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="vector-set!"/>
+  <Identifier val="v"/>
+  <Int val="0"/>
+  <Int val="9"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-get"/>
+  <Identifier val="v"/>
+  <Int val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-get"/>
+  <Identifier val="v"/>
+  <Int val="1"/>
+ </Call>
+ <Identifier val="v"/>
+</Ast>

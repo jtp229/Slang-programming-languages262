@@ -1,0 +1,29 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="loge"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="log10"/>
+  <Dbl val="100"/>
+ </Call>
+ <Call>
+  <Identifier val="log10"/>
+  <Dbl val="1000"/>
+ </Call>
+ <Call>
+  <Identifier val="pow"/>
+  <Int val="2"/>
+  <Int val="10"/>
+ </Call>
+ <Call>
+  <Identifier val="pow"/>
+  <Dbl val="2"/>
+  <Dbl val="3"/>
+ </Call>
+ <Call>
+  <Identifier val="pow"/>
+  <Dbl val="9"/>
+  <Dbl val="0.5"/>
+ </Call>
+</Ast>

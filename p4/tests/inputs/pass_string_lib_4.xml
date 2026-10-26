@@ -1,0 +1,51 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="string-char-at"/>
+  <Str val="hello"/>
+  <Int val="0"/>
+ </Call>
+ <Call>
+  <Identifier val="string-char-at"/>
+  <Str val="hello"/>
+  <Int val="4"/>
+ </Call>
+ <Call>
+  <Identifier val="string-length"/>
+  <Str val=""/>
+ </Call>
+ <Call>
+  <Identifier val="string-length"/>
+  <Str val="hello"/>
+ </Call>
+ <Call>
+  <Identifier val="substring"/>
+  <Str val="hello"/>
+  <Int val="1"/>
+  <Int val="3"/>
+ </Call>
+ <Call>
+  <Identifier val="substring"/>
+  <Str val="hello"/>
+  <Int val="0"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="substring"/>
+  <Str val="hello"/>
+  <Int val="2"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="string-append"/>
+ </Call>
+ <Call>
+  <Identifier val="string-append"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="string-append"/>
+  <Str val="a"/>
+  <Str val="b"/>
+  <Str val="c"/>
+ </Call>
+</Ast>

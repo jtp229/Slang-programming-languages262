@@ -1,0 +1,19 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="l"/>
+  <Cons>
+   <Int val="1"/>
+   <Cons>
+    <Int val="2"/>
+    <Cons>
+     <Int val="3"/>
+     <Empty/>
+    </Cons>
+   </Cons>
+  </Cons>
+ </DefineVar>
+ <Call>
+  <Identifier val="car"/>
+  <Identifier val="l"/>
+ </Call>
+</Ast>

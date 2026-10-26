@@ -1,0 +1,105 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="a"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="b"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="a"/>
+  <Identifier val="b"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Identifier val="a"/>
+  <Identifier val="b"/>
+ </Call>
+ <Call>
+  <Identifier val="set-car!"/>
+  <Identifier val="b"/>
+  <Int val="9"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="a"/>
+  <Identifier val="b"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="cdr"/>
+   <Identifier val="a"/>
+  </Call>
+  <Call>
+   <Identifier val="cdr"/>
+   <Identifier val="b"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="set-car!"/>
+  <Identifier val="a"/>
+  <Int val="9"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="a"/>
+  <Identifier val="b"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Identifier val="a"/>
+  <Identifier val="b"/>
+ </Call>
+ <DefineVar>
+  <Identifier val="v"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="2"/>
+   </Call>
+  </Call>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="w"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="2"/>
+   </Call>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="v"/>
+  <Identifier val="w"/>
+ </Call>
+ <Call>
+  <Identifier val="set-car!"/>
+  <Call>
+   <Identifier val="vector-get"/>
+   <Identifier val="w"/>
+   <Int val="1"/>
+  </Call>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="v"/>
+  <Identifier val="w"/>
+ </Call>
+</Ast>

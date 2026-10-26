@@ -1,0 +1,241 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="equal?"/>
+  <Int val="1"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Int val="1"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Int val="1"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Symbol val="a"/>
+  <Symbol val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Char val="a"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Str val="ab"/>
+  <Str val="ab"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Str val="ab"/>
+  <Str val="ac"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Str val="a"/>
+  <Symbol val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="list"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="3"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="2"/>
+    <Int val="3"/>
+   </Call>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="2"/>
+    <Int val="3"/>
+   </Call>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="2"/>
+    <Int val="3"/>
+   </Call>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="2"/>
+    <Int val="4"/>
+   </Call>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="vector"/>
+  </Call>
+  <Call>
+   <Identifier val="vector"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="1"/>
+    <Int val="2"/>
+   </Call>
+   <Str val="x"/>
+  </Call>
+  <Call>
+   <Identifier val="vector"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="1"/>
+    <Int val="2"/>
+   </Call>
+   <Str val="x"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="car"/>
+  <Identifier val="car"/>
+ </Call>
+ <Call>
+  <Identifier val="equal?"/>
+  <Identifier val="car"/>
+  <Identifier val="cdr"/>
+ </Call>
+</Ast>

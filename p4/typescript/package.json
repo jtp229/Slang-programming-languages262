@@ -1,0 +1,19 @@
+{
+  "name": "slang",
+  "version": "1.0.0",
+  "description": "An interpreter for XML ASTs of the CSE 262 Scheme variant, written in TypeScript",
+  "main": "src/slang.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "../test.sh typescript"
+  },
+  "author": "",
+  "license": "None",
+  "devDependencies": {
+    "@types/xml2js": "^0.4.14",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "xml2js": "^0.6.2"
+  }
+}

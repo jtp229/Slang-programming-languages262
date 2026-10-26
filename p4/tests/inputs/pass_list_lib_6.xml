@@ -1,0 +1,96 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="list"/>
+ </Call>
+ <Call>
+  <Identifier val="list"/>
+  <Int val="1"/>
+  <Int val="2"/>
+  <Int val="3"/>
+ </Call>
+ <Call>
+  <Identifier val="cons"/>
+  <Int val="1"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="cons"/>
+  <Int val="1"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="2"/>
+   <Call>
+    <Identifier val="list"/>
+   </Call>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="car"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="cdr"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="car"/>
+  <Call>
+   <Identifier val="cdr"/>
+   <Call>
+    <Identifier val="list"/>
+    <Int val="1"/>
+    <Int val="2"/>
+    <Int val="3"/>
+   </Call>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="cdr"/>
+  <Call>
+   <Identifier val="cdr"/>
+   <Call>
+    <Identifier val="cdr"/>
+    <Call>
+     <Identifier val="list"/>
+     <Int val="1"/>
+     <Int val="2"/>
+     <Int val="3"/>
+    </Call>
+   </Call>
+  </Call>
+ </Call>
+ <DefineVar>
+  <Identifier val="l"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="set-car!"/>
+  <Identifier val="l"/>
+  <Int val="10"/>
+ </Call>
+ <Call>
+  <Identifier val="set-cdr!"/>
+  <Call>
+   <Identifier val="cdr"/>
+   <Identifier val="l"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="99"/>
+  </Call>
+ </Call>
+ <Identifier val="l"/>
+</Ast>

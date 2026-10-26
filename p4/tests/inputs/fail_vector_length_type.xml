@@ -1,0 +1,18 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Str val="before"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-length"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="display"/>
+  <Str val="after"/>
+ </Call>
+</Ast>

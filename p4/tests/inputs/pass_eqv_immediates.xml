@@ -1,0 +1,86 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="eqv?"/>
+  <Int val="1"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Int val="1"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Int val="1"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Dbl val="1.5"/>
+  <Dbl val="1.5"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Dbl val="1.5"/>
+  <Dbl val="2.5"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Char val="a"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Char val="a"/>
+  <Char val="b"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Bool val="true"/>
+  <Bool val="true"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Bool val="false"/>
+  <Bool val="false"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Bool val="true"/>
+  <Bool val="false"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Symbol val="a"/>
+  <Symbol val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Symbol val="a"/>
+  <Symbol val="b"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Call>
+   <Identifier val="list"/>
+  </Call>
+  <Call>
+   <Identifier val="list"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Int val="1"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Str val="a"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="eqv?"/>
+  <Symbol val="a"/>
+  <Str val="a"/>
+ </Call>
+</Ast>
