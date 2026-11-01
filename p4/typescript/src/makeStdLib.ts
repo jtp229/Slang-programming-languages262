@@ -1,5 +1,8 @@
 import { Env } from './Env';
 import { BoolFalse, BoolTrue, BuiltInFunc, Dbl, Int, InterpretError, Value } from './Values';
+import { printValue } from './valuePrinter';
+
+declare const process: { stdout: { write(value: string): boolean } };
 
 /**
  * Add the standard library to the given environment.
@@ -14,6 +17,7 @@ import { BoolFalse, BoolTrue, BuiltInFunc, Dbl, Int, InterpretError, Value } fro
 export function addStdLib(env: Env) {
   env.put('+', new BuiltInFunc('+', add));
   env.put('=', new BuiltInFunc('=', numEq));
+  env.put('display', new BuiltInFunc('display', display));
 }
 
 /**
@@ -74,4 +78,14 @@ function numEq(args: Value[]): Value | InterpretError {
     }
   }
   return new BoolTrue();
+}
+
+function display(args: Value[]): Value | InterpretError {
+  if (args.length !== 1) {
+    return new InterpretError('Run-time Error: Wrong number of arguments');
+  }
+  const val = args[0];
+
+  process.stdout.write(printValue(val));
+  return val;
 }
