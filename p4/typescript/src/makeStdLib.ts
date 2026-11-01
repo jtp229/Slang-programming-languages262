@@ -30,7 +30,15 @@ declare const process: { stdout: { write(value: string): boolean } };
  */
 export function addStdLib(env: Env) {
   env.put('+', new BuiltInFunc('+', add));
-  env.put('=', new BuiltInFunc('=', numEq));
+  //env.put('-', new BuiltInFunc('-', subtract));
+ // env.put('*', new BuiltInFunc('*', multiply));
+ // env.put('/', new BuiltInFunc('/', divide));
+  //env.put('%', new BuiltInFunc('%', modulo));
+  //env.put('=', new BuiltInFunc('=', numEq));
+  //env.put('<', new BuiltInFunc('<', lessThan));
+  //env.put('<=', new BuiltInFunc('<=', lessThanOrEqual));
+  //env.put('>', new BuiltInFunc('>', greaterThan));
+  //env.put('>=', new BuiltInFunc('>=', greaterThanOrEqual));
   env.put('display', new BuiltInFunc('display', display));
   env.put('integer?', new BuiltInFunc('integer?', isInteger));
   env.put('double?', new BuiltInFunc('double?', isDouble));
@@ -45,17 +53,52 @@ export function addStdLib(env: Env) {
   env.put('not', new BuiltInFunc('not', not));
   env.put('abs', new BuiltInFunc('abs', abs));
   env.put('sqrt', new BuiltInFunc('sqrt', sqrt));
+  //env.put('pow', new BuiltInFunc('pow', pow));
   env.put('sin', new BuiltInFunc('sin', sin));
   env.put('cos', new BuiltInFunc('cos', cos));
+  //env.put('tan', new BuiltInFunc('tan', tan));
+  //env.put('asin', new BuiltInFunc('asin', asin));
+  //env.put('acos', new BuiltInFunc('acos', acos));
+  //env.put('atan', new BuiltInFunc('atan', atan));
+  //env.put('sinh', new BuiltInFunc('sinh', sinh));
+  //env.put('cosh', new BuiltInFunc('cosh', cosh));
+  //env.put('tanh', new BuiltInFunc('tanh', tanh));
+  //env.put('nan?', new BuiltInFunc('nan?', nan));
   env.put('loge', new BuiltInFunc('loge', loge));
   env.put('log10', new BuiltInFunc('log10', log10));
+  env.put('pi', new Dbl(Math.PI));
+  env.put('e', new Dbl(Math.E));
+  env.put('tau', new Dbl(2 * Math.PI));
+  env.put('inf+', new Dbl(Number.POSITIVE_INFINITY));
+  env.put('inf-', new Dbl(Number.NEGATIVE_INFINITY));
+  env.put('nan', new Dbl(Number.NaN));
   env.put('integer->double', new BuiltInFunc('integer->double', integerToDouble));
+  env.put('integer->string', new BuiltInFunc('integer->string', integerToString));
+  env.put('double->string', new BuiltInFunc('double->string', doubleToString));
+  env.put('string->integer', new BuiltInFunc('string->integer', stringToInteger));
+  env.put('string->double', new BuiltInFunc('string->double', stringToDouble));
+  env.put('integer->char', new BuiltInFunc('integer->char', integerToChar));
   env.put('char->string', new BuiltInFunc('char->string', charToString));
   env.put('char->integer', new BuiltInFunc('char->integer', charToInteger));
+  env.put('char-equal?', new BuiltInFunc('char-equal?', charEqual));
   env.put('double->integer', new BuiltInFunc('double->integer', doubleToInteger));
   env.put('string-length', new BuiltInFunc('string-length', stringLength));
   env.put('string-append', new BuiltInFunc('string-append', stringAppend));
   env.put('substring', new BuiltInFunc('substring', substring));
+  env.put('string-char-at', new BuiltInFunc('string-char-at', stringCharAt));
+  env.put('cons', new BuiltInFunc('cons', cons));
+  env.put('car', new BuiltInFunc('car', car));
+  env.put('cdr', new BuiltInFunc('cdr', cdr));
+  env.put('list', new BuiltInFunc('list', list));
+  env.put('set-car!', new BuiltInFunc('set-car!', setCar));
+  env.put('set-cdr!', new BuiltInFunc('set-cdr!', setCdr));
+  env.put('vector', new BuiltInFunc('vector', vector));
+  env.put('vector-init', new BuiltInFunc('vector-init', vectorInit));
+  env.put('vector-length', new BuiltInFunc('vector-length', vectorLength));
+  env.put('vector-get', new BuiltInFunc('vector-get', vectorGet));
+  env.put('vector-set!', new BuiltInFunc('vector-set!', vectorSet));
+  env.put('eqv?', new BuiltInFunc('eqv?', eqv));
+  env.put('equal?', new BuiltInFunc('equal?', equal));
 }
 
 /**
@@ -160,7 +203,7 @@ function checkArgs(args: Value[], count: number, types: ArgumentType[]): Interpr
 
   // 2. Check types from left to right
   for (let i = 0; i < args.length; i++) {
-    const expected = types[i];
+    const expected = types[i] ?? (count === -1 && types.length === 1 ? types[0] : undefined);
     const val = args[i];
 
     if (expected === 'Number') {
@@ -422,4 +465,47 @@ function stringCharAt(args: Value[]): Value | InterpretError {
     return new InterpretError('Run-time Error: Index out of bounds');
   }
   return new Char(s.charAt(index));
+}
+
+//scheme getters and setters
+function cons(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 2, []);
+  if (error) return error;
+  return new Cons(args[0], args[1]);
+}
+
+function car(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 1, [Cons]);
+  if (error) return error;
+  return (args[0] as Cons).car;
+}
+
+function cdr(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 1, [Cons]);
+  if (error) return error;
+  return (args[0] as Cons).cdr;
+}
+
+function list(args: Value[]): Value {
+  let result: Value = new EmptyCons();
+  for (let index = args.length - 1; index >= 0; index--) {
+    result = new Cons(args[index], result);
+  }
+  return result;
+}
+
+function setCar(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 2, [Cons]);
+  if (error) return error;
+  const cell = args[0] as Cons;
+  cell.car = args[1];
+  return args[1];
+}
+
+function setCdr(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 2, [Cons]);
+  if (error) return error;
+  const cell = args[0] as Cons;
+  cell.cdr = args[1];
+  return args[1];
 }
