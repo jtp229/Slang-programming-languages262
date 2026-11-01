@@ -45,10 +45,17 @@ export function addStdLib(env: Env) {
   env.put('not', new BuiltInFunc('not', not));
   env.put('abs', new BuiltInFunc('abs', abs));
   env.put('sqrt', new BuiltInFunc('sqrt', sqrt));
+  env.put('sin', new BuiltInFunc('sin', sin));
+  env.put('cos', new BuiltInFunc('cos', cos));
   env.put('loge', new BuiltInFunc('loge', loge));
   env.put('log10', new BuiltInFunc('log10', log10));
   env.put('integer->double', new BuiltInFunc('integer->double', integerToDouble));
   env.put('char->string', new BuiltInFunc('char->string', charToString));
+  env.put('char->integer', new BuiltInFunc('char->integer', charToInteger));
+  env.put('double->integer', new BuiltInFunc('double->integer', doubleToInteger));
+  env.put('string-length', new BuiltInFunc('string-length', stringLength));
+  env.put('string-append', new BuiltInFunc('string-append', stringAppend));
+  env.put('substring', new BuiltInFunc('substring', substring));
 }
 
 /**
@@ -260,7 +267,7 @@ function sqrt(args: Value[]): Value | InterpretError {
   const val = args[0];
   if(val instanceof Int || val instanceof Dbl){
     const result = Math.sqrt(val.val);
-    return (val instanceof Int) ? new Int(result) : new Dbl(result);
+    return new Dbl(result); //sqrt log10 and loge should always return a double
   }
   return new InterpretError('Run-time Error: Argument is not a number');
 }
@@ -275,7 +282,7 @@ function log10(args: Value[]): Value | InterpretError {
   const val = args[0];
   if (val instanceof Int || val instanceof Dbl) {
     const result = Math.log10(val.val);
-    return (val instanceof Int) ? new Int(result) : new Dbl(result);
+    return new Dbl(result);
   }
   return new InterpretError('Run-time Error: Argument is not a number');
 }
@@ -290,7 +297,7 @@ function loge(args: Value[]): Value | InterpretError {
   const val = args[0];
   if(val instanceof Int || val instanceof Dbl){
     const result = Math.log(val.val);
-    return (val instanceof Int) ? new Int(result) : new Dbl(result);
+    return new Dbl(result);
   }
   return new InterpretError('Run-time Error: Argument is not a number');
 }
@@ -326,7 +333,93 @@ function charToString(args: Value[]): Value | InterpretError {
   if(error) return error;
   const val = args[0];
   if(val instanceof Char){
-    return new String(val.val);
+    return new Str(val.val);
   }
   return new InterpretError('Run-time Error: Argument is not a character');
+}
+
+function charToInteger(args: Value[]): Value | InterpretError {
+  //validate exactly one character
+  const error = checkArgs(args, 1, [Char]);
+  if(error) return error;
+  const val = args[0];
+  if(val instanceof Char){
+    return new Int(val.val.charCodeAt(0)); //wrap thecharcode in an int
+  }
+  return new InterpretError('Run-time Error: Argument is not a character');
+}
+
+function sin(args: Value[]): Value | InterpretError {
+  //Validate
+  const error = checkArgs(args, 1, ['Number']);
+  if (error) {
+    return error;
+  }
+
+  const val = args[0];
+  if(val instanceof Int || val instanceof Dbl){
+    const result = Math.sin(val.val);
+    return new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a number');
+}
+
+function cos(args: Value[]): Value | InterpretError {
+  //Validate
+  const error = checkArgs(args, 1, ['Number']);
+  if (error) {
+    return error;
+  }
+
+  const val = args[0];
+  if(val instanceof Int || val instanceof Dbl){
+    const result = Math.cos(val.val);
+    return new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a number');
+}
+//string functinos
+function stringLength(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 1, [Str]);
+  if(error) return error;
+  const val = args[0] as Str;
+  return new Int(val.val.length);
+}
+
+function stringAppend(args: Value[]): Value | InterpretError {
+  //use -1 for zero or more
+  let result = "";
+  for ( let a of args) {
+    if(a instanceof Str) {
+      result += a.val;
+    } else {
+      return new InterpretError('Run-time Error: Argument is not a string');
+    }
+  }
+  return new Str(result);
+}
+
+function substring(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 3, [Str, Int, Int]);
+  if(error) return error;
+  const s = args[0] as Str;
+  const start = args[1] as Int;
+  const end = args[2] as Int;
+  //strict range check
+  if (start.val < 0 || start.val > end.val || end.val > s.val.length) {
+    return new InterpretError('Run-time Error: Index out of bounds');
+  }
+  return new Str(s.val.substring(start.val, end.val));
+}
+
+function stringCharAt(args: Value[]): Value | InterpretError {
+  const error = checkArgs(args, 2, [Str, Int]);
+  if(error) return error;
+  const s = (args[0] as Str).val;
+  const index = (args[1] as Int).val;
+  //strict range check
+  if (index < 0 || index >= s.length) {
+    return new InterpretError('Run-time Error: Index out of bounds');
+  }
+  return new Char(s.charAt(index));
 }
