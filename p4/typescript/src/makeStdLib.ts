@@ -1,5 +1,19 @@
 import { Env } from './Env';
-import { BoolFalse, BoolTrue, BuiltInFunc, Dbl, Int, InterpretError, Value } from './Values';
+import {
+  BoolFalse,
+  BoolTrue,
+  BuiltInFunc,
+  Char,
+  Cons,
+  Dbl,
+  EmptyCons,
+  Int,
+  InterpretError,
+  Str,
+  Symbol,
+  Value,
+  Vec,
+} from './Values';
 import { printValue } from './valuePrinter';
 
 declare const process: { stdout: { write(value: string): boolean } };
@@ -18,6 +32,17 @@ export function addStdLib(env: Env) {
   env.put('+', new BuiltInFunc('+', add));
   env.put('=', new BuiltInFunc('=', numEq));
   env.put('display', new BuiltInFunc('display', display));
+  env.put('integer?', new BuiltInFunc('integer?', isInteger));
+  env.put('double?', new BuiltInFunc('double?', isDouble));
+  env.put('number?', new BuiltInFunc('number?', isNumber));
+  env.put('string?', new BuiltInFunc('string?', isString));
+  env.put('char?', new BuiltInFunc('char?', isCharacter));
+  env.put('symbol?', new BuiltInFunc('symbol?', isSymbol));
+  env.put('vector?', new BuiltInFunc('vector?', isVector));
+  env.put('procedure?', new BuiltInFunc('procedure?', isProcedure));
+  env.put('list?', new BuiltInFunc('list?', isList));
+  env.put('null?', new BuiltInFunc('null?', isNull));
+  env.put('not', new BuiltInFunc('not', not));
 }
 
 /**
@@ -88,4 +113,112 @@ function display(args: Value[]): Value | InterpretError {
 
   process.stdout.write(printValue(val));
   return val;
+}
+
+
+type ArgumentType =
+  | 'Number'
+  | typeof Int
+  | typeof Dbl
+  | typeof Str
+  | typeof Char
+  | typeof Cons
+  | typeof Vec;
+
+const TYPE_ERRORS: Record<string, string> = {
+  Int: 'Argument is not an integer',
+  Dbl: 'Argument is not a double',
+  Str: 'Argument is not a string',
+  Char: 'Argument is not a character',
+  Cons: 'Argument is not a cons cell',
+  Vec: 'Argument is not a vector',
+};
+
+// Check argument count and any declared types from left to right
+function checkArgs(args: Value[], count: number, types: ArgumentType[]): InterpretError | null {
+  // 1. Check number of arguments
+  if (count === -1) {
+    if (args.length < 1) {
+      return new InterpretError('Run-time Error: Wrong number of arguments');
+    }
+  } else if (args.length !== count) {
+    return new InterpretError('Run-time Error: Wrong number of arguments');
+  }
+
+  // 2. Check types from left to right
+  for (let i = 0; i < args.length; i++) {
+    const expected = types[i];
+    const val = args[i];
+
+    if (expected === 'Number') {
+      if (!(val instanceof Int || val instanceof Dbl)) {
+        return new InterpretError('Run-time Error: Argument is not a number');
+      }
+    } else if (expected) {
+      if (!(val instanceof expected)) {
+        const message = TYPE_ERRORS[expected.name] || 'Invalid argument';
+        return new InterpretError(`Run-time Error: ${message}`);
+      }
+    }
+  }
+
+  return null; // No error
+}
+function typePredicate(args: Value[], predicate: (value: Value) => boolean): Value | InterpretError {
+  const error = checkArgs(args, 1, []);
+  if (error) {
+    return error;
+  }
+  return predicate(args[0]) ? new BoolTrue() : new BoolFalse();
+}
+
+// Type predicates
+function isInteger(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Int);
+}
+
+function isDouble(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Dbl);
+}
+
+function isNumber(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Int || value instanceof Dbl);
+}
+
+function isString(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Str);
+}
+
+function isCharacter(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Char);
+}
+
+function isSymbol(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Symbol);
+}
+
+function isVector(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof Vec);
+}
+
+function isProcedure(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof BuiltInFunc);
+}
+
+function isList(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => {
+    let tail = value;
+    while (tail instanceof Cons) {
+      tail = tail.cdr;
+    }
+    return tail instanceof EmptyCons;
+  });
+}
+
+function isNull(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof EmptyCons);
+}
+
+function not(args: Value[]): Value | InterpretError {
+  return typePredicate(args, value => value instanceof BoolFalse);
 }
