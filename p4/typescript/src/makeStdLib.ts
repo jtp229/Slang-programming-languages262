@@ -43,6 +43,12 @@ export function addStdLib(env: Env) {
   env.put('list?', new BuiltInFunc('list?', isList));
   env.put('null?', new BuiltInFunc('null?', isNull));
   env.put('not', new BuiltInFunc('not', not));
+  env.put('abs', new BuiltInFunc('abs', abs));
+  env.put('sqrt', new BuiltInFunc('sqrt', sqrt));
+  env.put('loge', new BuiltInFunc('loge', loge));
+  env.put('log10', new BuiltInFunc('log10', log10));
+  env.put('integer->double', new BuiltInFunc('integer->double', integerToDouble));
+  env.put('char->string', new BuiltInFunc('char->string', charToString));
 }
 
 /**
@@ -221,4 +227,106 @@ function isNull(args: Value[]): Value | InterpretError {
 
 function not(args: Value[]): Value | InterpretError {
   return typePredicate(args, value => value instanceof BoolFalse);
+}
+
+//math functions
+
+//abs
+function abs(args: Value[]): Value | InterpretError {
+  //Validate
+  const error = checkArgs(args, 1, ['Number']);
+  if (error) {
+    return error;
+  }
+
+  const val = args[0] 
+  if(val instanceof Int || val instanceof Dbl){
+
+  
+  const result = Math.abs(val.val);
+
+  return (val instanceof Int) ? new Int(result) : new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a number');
+}
+
+function sqrt(args: Value[]): Value | InterpretError {
+  //Validate
+  const error = checkArgs(args, 1, ['Number']);
+  if (error) {
+    return error;
+  }
+
+  const val = args[0];
+  if(val instanceof Int || val instanceof Dbl){
+    const result = Math.sqrt(val.val);
+    return (val instanceof Int) ? new Int(result) : new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a number');
+}
+
+function log10(args: Value[]): Value | InterpretError {
+  //Validate
+  const error = checkArgs(args, 1, ['Number']);
+  if (error) {
+    return error;
+  }
+
+  const val = args[0];
+  if (val instanceof Int || val instanceof Dbl) {
+    const result = Math.log10(val.val);
+    return (val instanceof Int) ? new Int(result) : new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a number');
+}
+
+function loge(args: Value[]): Value | InterpretError {
+  //Validate
+  const error = checkArgs(args, 1, ['Number']);
+  if (error) {
+    return error;
+  }
+  
+  const val = args[0];
+  if(val instanceof Int || val instanceof Dbl){
+    const result = Math.log(val.val);
+    return (val instanceof Int) ? new Int(result) : new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a number');
+}
+
+
+function doubleToInteger(args: Value[]): Value | InterpretError {
+  //validate exactly one double
+  const error = checkArgs(args, 1, [Dbl]);
+  if(error) return error;
+  const val = args[0];
+  if(val instanceof Dbl){
+    const result = Math.trunc(val.val);
+    return new Int(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not a double');
+}
+
+function integerToDouble(args: Value[]): Value | InterpretError {
+  //validate exactly one integer
+  const error = checkArgs(args, 1, [Int]);
+  if(error) return error;
+  const val = args[0];
+  if(val instanceof Int){
+    const result = val.val;
+    return new Dbl(result);
+  }
+  return new InterpretError('Run-time Error: Argument is not an integer');
+}
+
+function charToString(args: Value[]): Value | InterpretError {
+  //validate exactly one character
+  const error = checkArgs(args, 1, [Char]);
+  if(error) return error;
+  const val = args[0];
+  if(val instanceof Char){
+    return new String(val.val);
+  }
+  return new InterpretError('Run-time Error: Argument is not a character');
 }
