@@ -10,13 +10,14 @@
 (load "slang_compat.scm")
 
 (define (my-asinh x)
-  #f ;; [CSE 262] Implement Me!
+    (loge (+ x (sqrt (+ (* x x) 1))))
 )
 
 (define (my-acosh x)
-  #f ;; [CSE 262] Implement Me!
+ (loge (+ x (sqrt (- (* x x) 1))))
 )
 
 (define (my-atanh x)
-  #f ;; [CSE 262] Implement Me!
+;;implement divison properly
+ (/ (loge (/ (+ 1 x) (- 1 x))) 2)
 )

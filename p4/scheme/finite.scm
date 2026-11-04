@@ -9,9 +9,13 @@
 (load "slang_compat.scm")
 
 (define (my-infinite? x)
-  #f ;; [CSE 262] Implement Me!
+;;infinite is either positive or negative
+  (or (= x inf+) (= x inf-))
 )
 
 (define (my-finite? x)
-  #f ;; [CSE 262] Implement Me!
+;;finite only if regular number, so cant be nan(non number) or infinite.
+;;
+ (and (not (my-infinite? x)) (not (nan? x)))
+
 )

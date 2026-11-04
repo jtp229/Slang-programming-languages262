@@ -4,9 +4,12 @@
 (load "slang_compat.scm")
 
 (define (degrees r)
-  #f ;; [CSE 262] Implement Me!
+
+  ;;multiply r by (180 / pi)
+  (* r (/ 180 pi))
 )
 
 (define (radians d)
-  #f ;; [CSE 262] Implement Me!
+  ;;multiply d by (pi / 180)
+  (* d(/ pi 180))
 )
