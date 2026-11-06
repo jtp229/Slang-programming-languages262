@@ -10,14 +10,25 @@
 
 (load "slang_compat.scm")
 
+
 (define (my-floor x)
-  #f ;; [CSE 262] Implement Me!
-)
+  (let ((truncated (integer->double (double->integer x))))
+    ;; double->integer truncates toward zero
+    ;; this is floor for positive numbers but ceiling for negative
+    ;; If x is negative and had a fractional part (x != truncated), have to subtract 1 to move down correctly
+    (if (and (< x 0) (not (= x truncated)))
+        (- truncated 1.0)
+        truncated)))
 
 (define (my-ceil x)
-  #f ;; [CSE 262] Implement Me!
-)
+  (let ((truncated (integer->double (double->integer x))))
+    ;; truncation toward zero is already the ceiling for negative
+    ;; For positive numbers truncate moves down.
+    ;; If x is positive and had a fractional part add 1.0
+    (if (and (> x 0) (not (= x truncated)))
+        (+ truncated 1.0)
+        truncated)))
 
 (define (my-round x)
-  #f ;; [CSE 262] Implement Me!
-)
+  ;; To implement halves round up add 0.5 then take floor0
+  (my-floor (+ x 0.5)))

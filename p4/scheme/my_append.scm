@@ -7,5 +7,10 @@
 ;; either of its arguments.
 
 (define (my-append a b)
-  #f ;; [CSE 262] Implement Me!
-)
+  ;;  if the first list is empty, the result is the second list
+  (if (null? a)
+      b
+
+      ;;  take the first element of list a and cons it onto the result of appending the rest of a to b
+      ;;rebuild list from the front so it is not mutataed
+      (cons (car a) (my-append (cdr a) b))))
