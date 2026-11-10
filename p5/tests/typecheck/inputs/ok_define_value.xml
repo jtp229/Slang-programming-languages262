@@ -1,0 +1,72 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="+"/>
+  <Int val="1"/>
+  <DefineVar>
+   <Identifier val="x"/>
+   <Int val="2"/>
+  </DefineVar>
+ </Call>
+ <And>
+  <Int val="1"/>
+  <DefineVar>
+   <Identifier val="y"/>
+   <Int val="2"/>
+  </DefineVar>
+  <Int val="3"/>
+ </And>
+ <Or>
+  <Bool val="false"/>
+  <Set>
+   <Identifier val="y"/>
+   <Int val="10"/>
+  </Set>
+  <Bool val="true"/>
+ </Or>
+ <If>
+  <Set>
+   <Identifier val="y"/>
+   <Int val="20"/>
+  </Set>
+  <Str val="true"/>
+  <Str val="false"/>
+ </If>
+ <Begin>
+  <DefineVar>
+   <Identifier val="z"/>
+   <Int val="1"/>
+  </DefineVar>
+  <Int val="2"/>
+ </Begin>
+ <Call>
+  <Identifier val="+"/>
+  <Int val="1"/>
+  <Begin>
+   <Int val="2"/>
+   <DefineVar>
+    <Identifier val="w"/>
+    <Int val="3"/>
+   </DefineVar>
+  </Begin>
+ </Call>
+ <Call>
+  <Identifier val="+"/>
+  <Int val="1"/>
+  <Call>
+   <Identifier val="display"/>
+   <Int val="2"/>
+  </Call>
+ </Call>
+ <Call>
+  <Identifier val="procedure?"/>
+  <DefineFunc>
+   <Identifiers>
+    <Identifier val="f"/>
+    <Identifier val="a"/>
+   </Identifiers>
+   <Expressions>
+    <Identifier val="a"/>
+   </Expressions>
+  </DefineFunc>
+ </Call>
+</Ast>

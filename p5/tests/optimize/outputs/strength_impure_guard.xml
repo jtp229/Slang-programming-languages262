@@ -1,0 +1,46 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="h"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="car"/>
+    <Call>
+     <Identifier val="list"/>
+     <Int val="1"/>
+     <Int val="2"/>
+     <Int val="3"/>
+    </Call>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="i"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Call>
+     <Identifier val="h"/>
+    </Call>
+    <Int val="0"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="j"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Call>
+     <Identifier val="h"/>
+    </Call>
+    <Int val="2"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

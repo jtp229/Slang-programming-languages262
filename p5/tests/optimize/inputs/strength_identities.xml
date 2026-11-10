@@ -1,0 +1,98 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f1"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Call>
+     <Identifier val="string-length"/>
+     <Identifier val="s"/>
+    </Call>
+    <Int val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f2"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Int val="1"/>
+    <Call>
+     <Identifier val="string-length"/>
+     <Identifier val="s"/>
+    </Call>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f3"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="+"/>
+    <Call>
+     <Identifier val="sqrt"/>
+     <Identifier val="x"/>
+    </Call>
+    <Int val="0"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f4"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="+"/>
+    <Int val="0"/>
+    <Call>
+     <Identifier val="sqrt"/>
+     <Identifier val="x"/>
+    </Call>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f5"/>
+   <Identifier val="v"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="-"/>
+    <Call>
+     <Identifier val="vector-length"/>
+     <Identifier val="v"/>
+    </Call>
+    <Int val="0"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f6"/>
+   <Identifier val="c"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="/"/>
+    <Call>
+     <Identifier val="char-&gt;integer"/>
+     <Identifier val="c"/>
+    </Call>
+    <Int val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

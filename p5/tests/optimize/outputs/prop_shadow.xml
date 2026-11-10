@@ -1,0 +1,27 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="x"/>
+  <Int val="10"/>
+ </DefineVar>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="+"/>
+    <Identifier val="x"/>
+    <Int val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="+"/>
+  <Int val="10"/>
+  <Call>
+   <Identifier val="f"/>
+   <Int val="5"/>
+  </Call>
+ </Call>
+</Ast>

@@ -1,0 +1,102 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="n"/>
+      <Call>
+       <Identifier val="string-length"/>
+       <Identifier val="s"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="n"/>
+      <Identifier val="n"/>
+     </Call>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="g"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="n"/>
+      <Call>
+       <Identifier val="string-length"/>
+       <Identifier val="s"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Int val="0"/>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="h"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="d"/>
+      <Call>
+       <Identifier val="sqrt"/>
+       <Identifier val="x"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="d"/>
+      <Identifier val="d"/>
+     </Call>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="k"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="d"/>
+      <Call>
+       <Identifier val="sqrt"/>
+       <Identifier val="x"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Call>
+      <Identifier val="*"/>
+      <Int val="0"/>
+      <Identifier val="d"/>
+     </Call>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+</Ast>

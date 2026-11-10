@@ -1,0 +1,24 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="x"/>
+  <Int val="5"/>
+ </DefineVar>
+ <Call>
+  <Identifier val="+"/>
+  <Identifier val="x"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="string-length"/>
+  <Identifier val="x"/>
+ </Call>
+ <If>
+  <Bool val="true"/>
+  <Identifier val="x"/>
+  <Str val="b"/>
+ </If>
+ <Call>
+  <Identifier val="display"/>
+  <Identifier val="x"/>
+ </Call>
+</Ast>

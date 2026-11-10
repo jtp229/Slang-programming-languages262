@@ -1,0 +1,53 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="v"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </DefineVar>
+ <Set>
+  <Identifier val="v"/>
+  <Int val="5"/>
+ </Set>
+ <Call>
+  <Identifier val="vector?"/>
+  <Identifier val="v"/>
+ </Call>
+ <DefineVar>
+  <Identifier val="w"/>
+  <Str val="s"/>
+ </DefineVar>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="g"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="string?"/>
+    <Identifier val="w"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineVar>
+  <Identifier val="w"/>
+  <Int val="5"/>
+ </DefineVar>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="h"/>
+   <Identifier val="y"/>
+  </Identifiers>
+  <Expressions>
+   <DefineVar>
+    <Identifier val="y"/>
+    <Str val="s"/>
+   </DefineVar>
+   <Call>
+    <Identifier val="string?"/>
+    <Identifier val="y"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

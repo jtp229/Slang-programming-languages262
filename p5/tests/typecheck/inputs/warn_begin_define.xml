@@ -1,0 +1,13 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="+"/>
+  <Int val="1"/>
+  <Begin>
+   <Int val="2"/>
+   <DefineVar>
+    <Identifier val="x"/>
+    <Str val="s"/>
+   </DefineVar>
+  </Begin>
+ </Call>
+</Ast>

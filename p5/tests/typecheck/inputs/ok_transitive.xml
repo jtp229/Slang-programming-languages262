@@ -1,0 +1,56 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="s"/>
+  <Call>
+   <Identifier val="string-append"/>
+   <Str val="a"/>
+   <Str val="b"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="string-length"/>
+  <Identifier val="s"/>
+ </Call>
+ <DefineVar>
+  <Identifier val="v"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="vector-length"/>
+  <Identifier val="v"/>
+ </Call>
+ <DefineVar>
+  <Identifier val="c"/>
+  <Call>
+   <Identifier val="cons"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="car"/>
+  <Identifier val="c"/>
+ </Call>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="+"/>
+    <Identifier val="x"/>
+    <Int val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="f"/>
+  <Int val="10"/>
+ </Call>
+</Ast>

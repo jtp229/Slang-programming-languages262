@@ -1,0 +1,5 @@
+<Ast xmlns="ast">
+ <Begin>
+  <Int val="42"/>
+ </Begin>
+</Ast>

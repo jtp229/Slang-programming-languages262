@@ -1,0 +1,24 @@
+<Ast xmlns="ast">
+ <Cond>
+  <Condition>
+   <Test>
+    <Call>
+     <Identifier val="="/>
+     <Int val="2"/>
+     <Int val="2"/>
+    </Call>
+   </Test>
+   <Actions>
+    <Bool val="true"/>
+   </Actions>
+  </Condition>
+  <Condition>
+   <Test>
+    <Bool val="true"/>
+   </Test>
+   <Actions>
+    <Char val="a"/>
+   </Actions>
+  </Condition>
+ </Cond>
+</Ast>

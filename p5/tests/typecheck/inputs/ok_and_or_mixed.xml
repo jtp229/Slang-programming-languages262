@@ -1,0 +1,76 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <And>
+    <Call>
+     <Identifier val="&lt;"/>
+     <Identifier val="x"/>
+     <Int val="3"/>
+    </Call>
+    <Call>
+     <Identifier val="&gt;"/>
+     <Identifier val="x"/>
+     <Int val="0"/>
+    </Call>
+   </And>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="g"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="+"/>
+    <Int val="1"/>
+    <And>
+     <Call>
+      <Identifier val="&lt;"/>
+      <Identifier val="x"/>
+      <Int val="3"/>
+     </Call>
+     <Int val="5"/>
+    </And>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="h"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="string-length"/>
+    <Or>
+     <Identifier val="x"/>
+     <Str val="s"/>
+    </Or>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="k"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="+"/>
+    <Int val="1"/>
+    <Or>
+     <Call>
+      <Identifier val="string-length"/>
+      <Identifier val="s"/>
+     </Call>
+     <Int val="0"/>
+    </Or>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

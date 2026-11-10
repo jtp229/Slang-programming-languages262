@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="abs"/>
+  <Bool val="true"/>
+ </Call>
+</Ast>

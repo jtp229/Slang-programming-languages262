@@ -1,0 +1,46 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="n"/>
+      <Call>
+       <Identifier val="string-length"/>
+       <Identifier val="s"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Identifier val="n"/>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+ <DefineVar>
+  <Identifier val="u"/>
+  <Call>
+   <Identifier val="string-append"/>
+   <Str val="a"/>
+   <Call>
+    <Identifier val="integer-&gt;string"/>
+    <Int val="1"/>
+   </Call>
+  </Call>
+ </DefineVar>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="g"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="string-length"/>
+    <Identifier val="u"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

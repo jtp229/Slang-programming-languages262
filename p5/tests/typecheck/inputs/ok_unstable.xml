@@ -1,0 +1,42 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="q"/>
+  <Int val="1"/>
+ </DefineVar>
+ <Set>
+  <Identifier val="q"/>
+  <Str val="s"/>
+ </Set>
+ <Call>
+  <Identifier val="string-length"/>
+  <Identifier val="q"/>
+ </Call>
+ <DefineVar>
+  <Identifier val="r"/>
+  <Int val="1"/>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="r"/>
+  <Str val="s"/>
+ </DefineVar>
+ <Call>
+  <Identifier val="string-length"/>
+  <Identifier val="r"/>
+ </Call>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <DefineVar>
+    <Identifier val="x"/>
+    <Str val="s"/>
+   </DefineVar>
+   <Call>
+    <Identifier val="string-length"/>
+    <Identifier val="x"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

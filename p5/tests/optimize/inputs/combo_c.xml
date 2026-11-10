@@ -1,0 +1,14 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="x"/>
+  <Int val="5"/>
+ </DefineVar>
+ <Begin>
+  <Identifier val="x"/>
+  <If>
+   <Bool val="true"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </If>
+ </Begin>
+</Ast>

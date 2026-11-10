@@ -1,0 +1,34 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="limit"/>
+  <Int val="10"/>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="ratio"/>
+  <Int val="2"/>
+ </DefineVar>
+ <Begin>
+  <Identifier val="limit"/>
+  <If>
+   <Call>
+    <Identifier val="&lt;"/>
+    <Identifier val="ratio"/>
+    <Identifier val="limit"/>
+   </Call>
+   <Call>
+    <Identifier val="+"/>
+    <Call>
+     <Identifier val="*"/>
+     <Identifier val="ratio"/>
+     <Identifier val="ratio"/>
+    </Call>
+    <Call>
+     <Identifier val="-"/>
+     <Identifier val="limit"/>
+     <Identifier val="limit"/>
+    </Call>
+   </Call>
+   <Int val="-1"/>
+  </If>
+ </Begin>
+</Ast>

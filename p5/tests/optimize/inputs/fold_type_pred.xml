@@ -1,0 +1,65 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="integer?"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="double?"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="number?"/>
+  <Dbl val="2.5"/>
+ </Call>
+ <Call>
+  <Identifier val="symbol?"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="string?"/>
+  <Str val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="char?"/>
+  <Char val="a"/>
+ </Call>
+ <Call>
+  <Identifier val="vector?"/>
+  <Int val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="null?"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="list?"/>
+  <Str val="x"/>
+ </Call>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="v"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="vector?"/>
+    <Identifier val="v"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="procedure?"/>
+  <Identifier val="car"/>
+ </Call>
+ <Call>
+  <Identifier val="nan?"/>
+  <Dbl val="1.5"/>
+ </Call>
+ <Call>
+  <Identifier val="null?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+  </Call>
+ </Call>
+</Ast>

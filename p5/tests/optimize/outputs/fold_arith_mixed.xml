@@ -1,0 +1,21 @@
+<Ast xmlns="ast">
+ <Int val="-5"/>
+ <Dbl val="-5.5"/>
+ <Dbl val="3"/>
+ <Dbl val="3.5"/>
+ <Int val="-3"/>
+ <Dbl val="1"/>
+ <Dbl val="1.5"/>
+ <Int val="-1"/>
+ <Call>
+  <Identifier val="/"/>
+  <Int val="7"/>
+  <Int val="0"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="/"/>
+  <Dbl val="7"/>
+  <Int val="0"/>
+ </Call>
+</Ast>

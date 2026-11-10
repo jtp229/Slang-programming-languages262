@@ -1,0 +1,53 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="-"/>
+  <Int val="5"/>
+ </Call>
+ <Call>
+  <Identifier val="-"/>
+  <Dbl val="5.5"/>
+ </Call>
+ <Call>
+  <Identifier val="/"/>
+  <Int val="7"/>
+  <Int val="2"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="/"/>
+  <Int val="7"/>
+  <Dbl val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="/"/>
+  <Int val="-7"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="%"/>
+  <Int val="7"/>
+  <Int val="2"/>
+  <Dbl val="1.5"/>
+ </Call>
+ <Call>
+  <Identifier val="%"/>
+  <Dbl val="7.5"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="%"/>
+  <Int val="-7"/>
+  <Int val="2"/>
+ </Call>
+ <Call>
+  <Identifier val="/"/>
+  <Int val="7"/>
+  <Int val="0"/>
+  <Dbl val="1"/>
+ </Call>
+ <Call>
+  <Identifier val="/"/>
+  <Dbl val="7"/>
+  <Int val="0"/>
+ </Call>
+</Ast>

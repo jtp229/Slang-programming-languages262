@@ -1,0 +1,64 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="n"/>
+      <Call>
+       <Identifier val="string-length"/>
+       <Identifier val="s"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <If>
+      <Call>
+       <Identifier val="integer?"/>
+       <Identifier val="n"/>
+      </Call>
+      <Call>
+       <Identifier val="*"/>
+       <Identifier val="n"/>
+       <Int val="1"/>
+      </Call>
+      <Int val="-1"/>
+     </If>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+ <DefineVar>
+  <Identifier val="u"/>
+  <Call>
+   <Identifier val="string-append"/>
+   <Str val="a"/>
+   <Call>
+    <Identifier val="integer-&gt;string"/>
+    <Int val="1"/>
+   </Call>
+  </Call>
+ </DefineVar>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="g"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="string?"/>
+     <Identifier val="u"/>
+    </Call>
+    <Call>
+     <Identifier val="string-length"/>
+     <Identifier val="u"/>
+    </Call>
+    <Int val="0"/>
+   </If>
+  </Expressions>
+ </DefineFunc>
+</Ast>

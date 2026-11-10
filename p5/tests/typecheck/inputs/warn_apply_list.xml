@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Apply>
+  <Identifier val="+"/>
+  <Int val="10"/>
+ </Apply>
+</Ast>

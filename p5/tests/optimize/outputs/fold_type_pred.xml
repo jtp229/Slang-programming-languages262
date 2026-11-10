@@ -1,0 +1,38 @@
+<Ast xmlns="ast">
+ <Bool val="true"/>
+ <Bool val="false"/>
+ <Bool val="true"/>
+ <Bool val="false"/>
+ <Bool val="true"/>
+ <Bool val="true"/>
+ <Bool val="false"/>
+ <Bool val="false"/>
+ <Bool val="false"/>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="v"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="vector?"/>
+    <Identifier val="v"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="procedure?"/>
+  <Identifier val="car"/>
+ </Call>
+ <Call>
+  <Identifier val="nan?"/>
+  <Dbl val="1.5"/>
+ </Call>
+ <Call>
+  <Identifier val="null?"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+  </Call>
+ </Call>
+</Ast>

@@ -1,0 +1,21 @@
+<Ast xmlns="ast">
+ <If>
+  <Bool val="true"/>
+  <Int val="1"/>
+  <Int val="2"/>
+ </If>
+ <If>
+  <Bool val="false"/>
+  <Int val="1"/>
+  <Int val="2"/>
+ </If>
+ <If>
+  <Call>
+   <Identifier val="&lt;"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Str val="yes"/>
+  <Str val="no"/>
+ </If>
+</Ast>

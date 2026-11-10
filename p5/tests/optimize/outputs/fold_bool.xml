@@ -1,0 +1,14 @@
+<Ast xmlns="ast">
+ <Bool val="false"/>
+ <Bool val="true"/>
+ <Bool val="false"/>
+ <Bool val="true"/>
+ <And>
+  <Bool val="true"/>
+  <Bool val="true"/>
+ </And>
+ <Or>
+  <Bool val="false"/>
+  <Bool val="false"/>
+ </Or>
+</Ast>

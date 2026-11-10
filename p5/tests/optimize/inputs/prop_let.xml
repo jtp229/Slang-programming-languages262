@@ -1,0 +1,17 @@
+<Ast xmlns="ast">
+ <Let>
+  <Bindings>
+   <Binding>
+    <Identifier val="a"/>
+    <Int val="5"/>
+   </Binding>
+  </Bindings>
+  <Actions>
+   <Call>
+    <Identifier val="*"/>
+    <Identifier val="a"/>
+    <Identifier val="a"/>
+   </Call>
+  </Actions>
+ </Let>
+</Ast>

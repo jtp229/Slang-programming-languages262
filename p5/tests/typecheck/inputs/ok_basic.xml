@@ -1,0 +1,44 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="+"/>
+  <Int val="1"/>
+  <Dbl val="2.5"/>
+ </Call>
+ <If>
+  <Call>
+   <Identifier val="&lt;"/>
+   <Int val="1"/>
+   <Int val="2"/>
+  </Call>
+  <Str val="yes"/>
+  <Str val="no"/>
+ </If>
+ <DefineVar>
+  <Identifier val="my-list"/>
+  <Call>
+   <Identifier val="list"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="car"/>
+  <Identifier val="my-list"/>
+ </Call>
+ <Call>
+  <Identifier val="string-append"/>
+  <Str val="hello "/>
+  <Str val="world"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-get"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="10"/>
+   <Int val="20"/>
+   <Int val="30"/>
+  </Call>
+  <Int val="1"/>
+ </Call>
+</Ast>

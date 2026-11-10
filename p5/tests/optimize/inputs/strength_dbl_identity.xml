@@ -1,0 +1,79 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f1"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Call>
+     <Identifier val="sqrt"/>
+     <Identifier val="x"/>
+    </Call>
+    <Dbl val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f2"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Dbl val="1"/>
+    <Call>
+     <Identifier val="sqrt"/>
+     <Identifier val="x"/>
+    </Call>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f3"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="/"/>
+    <Call>
+     <Identifier val="sqrt"/>
+     <Identifier val="x"/>
+    </Call>
+    <Dbl val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f4"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Call>
+     <Identifier val="string-length"/>
+     <Identifier val="s"/>
+    </Call>
+    <Dbl val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f5"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Identifier val="x"/>
+    <Dbl val="1"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

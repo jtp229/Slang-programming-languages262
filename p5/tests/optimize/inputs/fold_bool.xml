@@ -1,0 +1,34 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="not"/>
+  <Bool val="true"/>
+ </Call>
+ <Call>
+  <Identifier val="not"/>
+  <Bool val="false"/>
+ </Call>
+ <And>
+  <Bool val="false"/>
+  <Call>
+   <Identifier val="/"/>
+   <Int val="1"/>
+   <Int val="0"/>
+  </Call>
+ </And>
+ <Or>
+  <Bool val="true"/>
+  <Call>
+   <Identifier val="/"/>
+   <Int val="1"/>
+   <Int val="0"/>
+  </Call>
+ </Or>
+ <And>
+  <Bool val="true"/>
+  <Bool val="true"/>
+ </And>
+ <Or>
+  <Bool val="false"/>
+  <Bool val="false"/>
+ </Or>
+</Ast>

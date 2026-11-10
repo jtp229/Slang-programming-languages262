@@ -1,0 +1,13 @@
+<Ast xmlns="ast">
+ <Int val="3"/>
+ <Int val="7"/>
+ <Int val="20"/>
+ <Int val="5"/>
+ <Int val="1"/>
+ <Bool val="true"/>
+ <Bool val="true"/>
+ <Bool val="true"/>
+ <Bool val="true"/>
+ <Bool val="false"/>
+ <Dbl val="3.5"/>
+</Ast>

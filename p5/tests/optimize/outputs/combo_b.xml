@@ -1,0 +1,28 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="n"/>
+      <Call>
+       <Identifier val="string-length"/>
+       <Identifier val="s"/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="n"/>
+      <Identifier val="n"/>
+     </Call>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+</Ast>

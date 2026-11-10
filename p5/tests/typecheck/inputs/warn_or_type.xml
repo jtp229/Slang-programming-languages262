@@ -1,0 +1,20 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="f"/>
+   <Identifier val="s"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="string-length"/>
+    <Or>
+     <Call>
+      <Identifier val="string-length"/>
+      <Identifier val="s"/>
+     </Call>
+     <Int val="0"/>
+    </Or>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+</Ast>

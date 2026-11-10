@@ -1,0 +1,83 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="double"/>
+   <Identifier val="x"/>
+  </Identifiers>
+  <Expressions>
+   <Call>
+    <Identifier val="*"/>
+    <Identifier val="x"/>
+    <Identifier val="x"/>
+   </Call>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="choose"/>
+   <Identifier val="a"/>
+   <Identifier val="b"/>
+  </Identifiers>
+  <Expressions>
+   <Cond>
+    <Condition>
+     <Test>
+      <Call>
+       <Identifier val="&gt;"/>
+       <Identifier val="a"/>
+       <Identifier val="b"/>
+      </Call>
+     </Test>
+     <Actions>
+      <Identifier val="a"/>
+     </Actions>
+    </Condition>
+    <Condition>
+     <Test>
+      <Bool val="true"/>
+     </Test>
+     <Actions>
+      <Identifier val="b"/>
+     </Actions>
+    </Condition>
+   </Cond>
+  </Expressions>
+ </DefineFunc>
+ <DefineVar>
+  <Identifier val="lst"/>
+  <Call>
+   <Identifier val="list"/>
+   <Call>
+    <Identifier val="double"/>
+    <Int val="3"/>
+   </Call>
+   <Call>
+    <Identifier val="choose"/>
+    <Int val="5"/>
+    <Int val="2"/>
+   </Call>
+  </Call>
+ </DefineVar>
+ <Apply>
+  <Identifier val="+"/>
+  <Identifier val="lst"/>
+ </Apply>
+ <Call>
+  <Identifier val="car"/>
+  <Identifier val="lst"/>
+ </Call>
+ <Call>
+  <Identifier val="vector-get"/>
+  <Call>
+   <Identifier val="vector"/>
+   <Int val="1"/>
+   <Int val="2"/>
+   <Int val="3"/>
+  </Call>
+  <Call>
+   <Identifier val="choose"/>
+   <Int val="0"/>
+   <Int val="1"/>
+  </Call>
+ </Call>
+</Ast>
