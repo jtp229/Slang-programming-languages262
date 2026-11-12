@@ -206,8 +206,113 @@ func getBuiltinSignature(name string) *Signature {
 //
 // @return The set of unstable names
 func findUnstableNames(forest []AstNode) map[string]bool {
-	// TODO: implement this
-	return map[string]bool{}
+	//mark every name assigned by set
+	setNames := make(map[string]bool)
+	//mark a name defined by a define nested inside another expression or body
+	innerDefineNames := make(map[string]bool)
+	//count direct top level defines by name, mark names defined more than once
+	defineCounts := make(map[string]int)
+
+	var walk func(AstNode, bool)
+	walk = func(node AstNode, topLevel bool) {
+		recordDefinition := func(name string) {
+			if topLevel {
+				defineCounts[name]++
+			} else {
+				innerDefineNames[name] = true
+			}
+		}
+
+		switch n := node.(type) {
+		case *ConsNode:
+			walk(n.car, false)
+			walk(n.cdr, false)
+		case *VecNode:
+			for _, item := range n.items {
+				walk(item, false)
+			}
+		case *AndNode:
+			for _, expression := range n.exprs {
+				walk(expression, false)
+			}
+		case *CallNode:
+			for _, expression := range n.exprs {
+				walk(expression, false)
+			}
+		case *BeginNode:
+			for _, expression := range n.exprs {
+				walk(expression, false)
+			}
+		case *Condition:
+			walk(n.test, false)
+			for _, expression := range n.exprs {
+				walk(expression, false)
+			}
+		case *CondNode:
+			for index := range n.conditions {
+				walk(&n.conditions[index], false)
+			}
+		case *DefineVarNode:
+			recordDefinition(n.identifier.id)
+			walk(n.expression, false)
+		case *DefineFuncNode:
+			if len(n.ids) > 0 {
+				recordDefinition(n.ids[0].id)
+			}
+			for _, expression := range n.body {
+				walk(expression, false)
+			}
+		case *IfNode:
+			walk(n.cond, false)
+			walk(n.if_true, false)
+			walk(n.if_false, false)
+		case *LambdaDefNode:
+			for _, expression := range n.body {
+				walk(expression, false)
+			}
+		case *OrNode:
+			for _, expression := range n.exprs {
+				walk(expression, false)
+			}
+		case *QuoteNode:
+			walk(n.datum, false)
+		case *SetNode:
+			setNames[n.identifier.id] = true
+			walk(n.expression, false)
+		case *TickNode:
+			walk(n.datum, false)
+		case *LetDef:
+			walk(n.val, false)
+		case *LetNode:
+			for index := range n.vars {
+				walk(&n.vars[index], false)
+			}
+			for _, expression := range n.body {
+				walk(expression, false)
+			}
+		case *ApplyNode:
+			walk(n.function, false)
+			walk(n.args, false)
+		}
+	}
+
+	for _, expr := range forest {
+		walk(expr, true)
+	}
+
+	unstable := make(map[string]bool)
+	for name, count := range defineCounts {
+		if count > 1 {
+			unstable[name] = true
+		}
+	}
+	for name := range setNames {
+		unstable[name] = true
+	}
+	for name := range innerDefineNames {
+		unstable[name] = true
+	}
+	return unstable
 }
 
 // Check one top-level expression.  The environment is shared across calls, so a
@@ -220,5 +325,6 @@ func findUnstableNames(forest []AstNode) map[string]bool {
 // @return The type of `expr`, and an error holding the first warning (or nil)
 func typecheckAst(expr AstNode, env *TypeEnv, unstable map[string]bool) (TypeDecoration, error) {
 	// TODO: implement this
+
 	return RUNTIME, errors.New("typecheckAst is not implemented")
 }
