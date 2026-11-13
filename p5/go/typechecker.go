@@ -1,7 +1,5 @@
 package main
 
-import "errors"
-
 // This file implements the -typecheck mode for slang.  The checker walks each
 // top-level expression and tags every node with its type.  It works bottom-up:
 // to check a node, it first checks the node's children, then reads their tags
@@ -324,7 +322,74 @@ func findUnstableNames(forest []AstNode) map[string]bool {
 //
 // @return The type of `expr`, and an error holding the first warning (or nil)
 func typecheckAst(expr AstNode, env *TypeEnv, unstable map[string]bool) (TypeDecoration, error) {
-	// TODO: implement this
+	typ := RUNTIME
 
-	return RUNTIME, errors.New("typecheckAst is not implemented")
+	switch n := expr.(type) {
+	// Literal nodes
+	case *IntNode:
+		typ = INT
+	case *DblNode:
+		typ = DBL
+	case *BoolTrueNode, *BoolFalseNode:
+		typ = BOOL
+	case *CharNode:
+		typ = CHAR
+	case *StrNode:
+		typ = STR
+	case *SymbolNode:
+		typ = SYMBOL
+	case *EmptyConsNode:
+		typ = CONS
+
+	// A name's type is unknown if it can change at runtime.
+	case *IdentifierNode:
+		if unstable[n.id] {
+			typ = RUNTIME
+		} else {
+			typ = env.get(n.id)
+		}
+
+	// Check children first; stop on the first warning.
+	case *ConsNode:
+		if _, err := typecheckAst(n.car, env, unstable); err != nil {
+			return RUNTIME, err
+		}
+		if _, err := typecheckAst(n.cdr, env, unstable); err != nil {
+			return RUNTIME, err
+		}
+		typ = CONS
+
+	case *VecNode:
+		for _, item := range n.items {
+			if _, err := typecheckAst(item, env, unstable); err != nil {
+				return RUNTIME, err
+			}
+		}
+		typ = VEC
+
+	// Quoted data isn't checked as an expression.
+	case *QuoteNode, *TickNode:
+		typ = RUNTIME
+
+	case *AndNode:
+
+	case *OrNode:
+	case *BeginNode:
+	case *IfNode:
+	case *CondNode:
+	case *DefineVarNode:
+	case *DefineFuncNode:
+	case *LambdaDefNode:
+	case *SetNode:
+	case *LetNode:
+	case *ApplyNode:
+	case *CallNode:
+		typ = RUNTIME
+
+	default:
+		typ = RUNTIME
+	}
+
+	expr.SetType(typ)
+	return typ, nil
 }
