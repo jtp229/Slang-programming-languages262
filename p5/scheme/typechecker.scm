@@ -165,6 +165,172 @@
       (vector (list any) #f 'ARG))
      (#t #f))))
 
+(define (typecheck-sequence exprs env)
+  (if (null? exprs)
+      (cons 'RUNTIME #f)
+      (let ((result (typecheck-ast (car exprs) env)))
+        (if (cdr result)
+            result
+            (if (null? (cdr exprs))
+                result
+                (typecheck-sequence (cdr exprs) env))))))
+
+(define (typecheck-lambda-body formals body argument-types env)
+  (let ((local (type-env-push env)))
+    (let loop ((ids formals) (types argument-types))
+      (if (not (null? ids))
+          (let ((type (if (null? types) 'RUNTIME (car types))))
+            (ast-set-type! (car ids) type)
+            (type-env-put! local (vector-ref (car ids) 1) type)
+            (loop (cdr ids) (if (null? types) '() (cdr types))))))
+    (typecheck-sequence body local)))
+
+(define (type-allowed? actual allowed)
+  (or (eq? actual 'RUNTIME) (memq actual allowed)))
+
+(define (warning-result message) (cons 'RUNTIME message))
+
+(define (format-type type) (symbol->string type))
+
+(define (typecheck-builtin-call name signature arguments env)
+  (let* ((inputs (vector-ref signature 0))
+         (variadic (vector-ref signature 1))
+         (required (length inputs))
+         (count (length arguments)))
+    (if (or (< count required) (and (not variadic) (not (= count required))))
+        (warning-result
+         (string-append "Warning: Wrong number of arguments for " name
+                        ": expected " (number->string required)
+                        ", found " (number->string count)))
+        (let check-arguments ((args arguments) (index 0) (types '()))
+          (if (null? args)
+              (let ((output (vector-ref signature 2)))
+                (cond
+                 ((eq? output 'ARG)
+                  (cons (car (reverse types)) #f))
+                 ((eq? output 'NUMERIC)
+                  (if (memq 'RUNTIME types)
+                      (cons 'RUNTIME #f)
+                      (if (memq 'DBL types) (cons 'DBL #f) (cons 'INT #f))))
+                 (else (cons output #f))))
+              (let* ((result (typecheck-ast (car args) env))
+                     (actual (car result))
+                     (allowed (if (< index required)
+                                  (list-ref inputs index)
+                                  variadic)))
+                (if (cdr result)
+                    result
+                    (if (not (type-allowed? actual allowed))
+                        (warning-result
+                         (string-append "Warning: Type mismatch in call to " name
+                                        ": argument " (number->string (+ index 1))
+                                        " expected " (format-type (car allowed))
+                                        ", found " (format-type actual)))
+                        (check-arguments (cdr args) (+ index 1)
+                                         (cons actual types))))))))))
+
+(define (typecheck-call expr env)
+  (let* ((expressions (vector-ref expr 1))
+         (operator (car expressions))
+         (arguments (cdr expressions)))
+    (if (eq? (vector-ref operator 0) 'AST_IDENTIFIER)
+        (let ((signature (get-builtin-signature (vector-ref operator 1))))
+          (if signature
+              (let ((operator-result (typecheck-ast operator env)))
+                (if (cdr operator-result)
+                    operator-result
+                    (typecheck-builtin-call (vector-ref operator 1) signature arguments env)))
+              (typecheck-nonbuiltin-call expr operator arguments env)))
+        (typecheck-nonbuiltin-call expr operator arguments env))))
+
+(define (typecheck-nonbuiltin-call expr operator arguments env)
+  (if (eq? (vector-ref operator 0) 'AST_LAMBDA_DEF)
+      (let ((operator-result (typecheck-ast operator env)))
+        (if (cdr operator-result)
+            operator-result
+            (let ((formals (vector-ref operator 1)))
+              (if (not (= (length arguments) (length formals)))
+                  (warning-result
+                   (string-append "Warning: Wrong number of arguments for lambda: expected "
+                                  (number->string (length formals))
+                                  ", found " (number->string (length arguments))))
+                  (let check-arguments ((args arguments) (types '()))
+                    (if (null? args)
+                        (let ((body-result
+                               (typecheck-lambda-body formals (vector-ref operator 2)
+                                                      (reverse types) env)))
+                          (if (cdr body-result)
+                              body-result
+                              (begin
+                                (ast-set-type! operator 'LAMBDA)
+                                body-result)))
+                        (let ((result (typecheck-ast (car args) env)))
+                          (if (cdr result)
+                              result
+                              (check-arguments (cdr args) (cons (car result) types))))))))))
+      (let ((operator-result (typecheck-ast operator env)))
+        (if (cdr operator-result)
+            operator-result
+            (let ((arguments-result (typecheck-sequence arguments env)))
+              (if (cdr arguments-result)
+                  arguments-result
+                  (cons 'RUNTIME #f)))))))
+
+;;; Find unstable names with the same conservative rules as the Go checker.
+(define (unstable-walk! node top-level state)
+  (let ((kind (vector-ref node 0)))
+    (define (walk-list nodes)
+      (for-each (lambda (item) (unstable-walk! item #f state)) nodes))
+    (define (record-definition name)
+      (if top-level
+          (let* ((counts (vector-ref state 2))
+                 (entry (assoc name counts)))
+            (vector-set! state 2
+                         (if entry
+                             (cons (cons name (+ 1 (cdr entry)))
+                                   (let remove ((rest counts))
+                                     (cond ((null? rest) '())
+                                           ((string=? (caar rest) name) (cdr rest))
+                                           (else (cons (car rest) (remove (cdr rest)))))))
+                             (cons (cons name 1) counts))))
+          (if (not (member name (vector-ref state 1)))
+              (vector-set! state 1 (cons name (vector-ref state 1))))))
+    (cond
+     ((eq? kind 'AST_CONS)
+      (unstable-walk! (vector-ref node 1) #f state)
+      (unstable-walk! (vector-ref node 2) #f state))
+     ((memq kind '(AST_VEC AST_AND AST_CALL AST_BEGIN AST_COND AST_OR))
+      (walk-list (vector-ref node 1)))
+     ((eq? kind 'CONDITION)
+      (unstable-walk! (vector-ref node 1) #f state)
+      (walk-list (vector-ref node 2)))
+     ((eq? kind 'AST_DEFINE_VAR)
+      (record-definition (vector-ref (vector-ref node 1) 1))
+      (unstable-walk! (vector-ref node 2) #f state))
+     ((eq? kind 'AST_DEFINE_FUNC)
+      (let ((ids (vector-ref node 1)))
+        (if (not (null? ids)) (record-definition (vector-ref (car ids) 1))))
+      (walk-list (vector-ref node 2)))
+     ((eq? kind 'AST_IF)
+      (unstable-walk! (vector-ref node 1) #f state)
+      (unstable-walk! (vector-ref node 2) #f state)
+      (unstable-walk! (vector-ref node 3) #f state))
+     ((eq? kind 'AST_LAMBDA_DEF) (walk-list (vector-ref node 2)))
+     ((eq? kind 'AST_QUOTE) (unstable-walk! (vector-ref node 1) #f state))
+     ((eq? kind 'AST_SET)
+      (let ((name (vector-ref (vector-ref node 1) 1)))
+        (if (not (member name (vector-ref state 0)))
+            (vector-set! state 0 (cons name (vector-ref state 0)))))
+      (unstable-walk! (vector-ref node 2) #f state))
+     ((eq? kind 'AST_TICK) (unstable-walk! (vector-ref node 1) #f state))
+     ((eq? kind 'LET_DEF) (unstable-walk! (vector-ref node 2) #f state))
+     ((eq? kind 'AST_LET)
+      (walk-list (vector-ref node 1))
+      (walk-list (vector-ref node 2)))
+     ((eq? kind 'AST_APPLY)
+      (unstable-walk! (vector-ref node 1) #f state)
+      (unstable-walk! (vector-ref node 2) #f state)))))
+
 ;;; Find the names whose type can't be trusted, because the variable they
 ;;; name might be given a value of a different type while the program runs.
 ;;; The optimizer trusts the type checker's types, so a type must never be
@@ -180,8 +346,16 @@
 ;;;
 ;;; @return a list of the unstable names (possibly with duplicates)
 (define (find-unstable-names forest)
-  ;; TODO: implement this
-  '())
+  (let ((state (vector '() '() '())))
+    (for-each (lambda (expr) (unstable-walk! expr #t state)) forest)
+    (let ((multiple-defines
+           (let collect ((counts (vector-ref state 2)))
+             (if (null? counts)
+                 '()
+                 (if (> (cdar counts) 1)
+                     (cons (caar counts) (collect (cdr counts)))
+                     (collect (cdr counts)))))))
+      (append (vector-ref state 0) (vector-ref state 1) multiple-defines))))
 
 ;;; Perform static type checking on an AST node
 ;;;
@@ -190,5 +364,167 @@
 ;;;
 ;;; @return a Pair (type . error-message) where error-message is #f if no error
 (define (typecheck-ast expr env)
-  ;; TODO: implement this
-  (cons 'RUNTIME "typecheck-ast is not implemented"))
+  (let ((kind (vector-ref expr 0)))
+    (define (finish type) (ast-set-type! expr type) (cons type #f))
+    (define (check-child child)
+      (typecheck-ast child env))
+    (cond
+     ((eq? kind 'AST_INT) (finish 'INT))
+     ((eq? kind 'AST_DBL) (finish 'DBL))
+     ((memq kind '(AST_BOOL_TRUE AST_BOOL_FALSE)) (finish 'BOOL))
+     ((eq? kind 'AST_CHAR) (finish 'CHAR))
+     ((eq? kind 'AST_STR) (finish 'STR))
+     ((eq? kind 'AST_SYMBOL) (finish 'SYMBOL))
+     ((eq? kind 'AST_EMPTY_CONS) (finish 'CONS))
+     ((eq? kind 'AST_IDENTIFIER)
+      (finish (if (type-env-unstable? env (vector-ref expr 1))
+                  'RUNTIME
+                  (type-env-get env (vector-ref expr 1)))))
+     ((eq? kind 'AST_CONS)
+      (let ((first (check-child (vector-ref expr 1))))
+        (if (cdr first)
+            first
+            (let ((second (check-child (vector-ref expr 2))))
+              (if (cdr second) second (finish 'CONS))))))
+     ((eq? kind 'AST_VEC)
+      (let ((result (typecheck-sequence (vector-ref expr 1) env)))
+        (if (cdr result) result (finish 'VEC))))
+     ((memq kind '(AST_QUOTE AST_TICK)) (finish 'RUNTIME))
+     ((memq kind '(AST_AND AST_OR))
+      (let ((expressions (vector-ref expr 1)))
+        (if (null? expressions)
+            (finish 'RUNTIME)
+            (let ((result (typecheck-sequence expressions env)))
+              (if (cdr result)
+                  result
+                  (let ((first-type (ast-get-type (car expressions))))
+                    (finish (if (let same? ((rest (cdr expressions)))
+                                  (or (null? rest)
+                                      (and (eq? (ast-get-type (car rest)) first-type)
+                                           (same? (cdr rest)))))
+                                first-type
+                                'RUNTIME))))))))
+     ((eq? kind 'AST_BEGIN)
+      (let ((result (typecheck-sequence (vector-ref expr 1) env)))
+        (if (cdr result) result (finish (car result)))))
+     ((eq? kind 'AST_IF)
+      (let ((condition (check-child (vector-ref expr 1))))
+        (if (cdr condition)
+            condition
+            (let ((true-result (check-child (vector-ref expr 2))))
+              (if (cdr true-result)
+                  true-result
+                  (let ((false-result (check-child (vector-ref expr 3))))
+                    (if (cdr false-result)
+                        false-result
+                        (let ((true-type (car true-result))
+                              (false-type (car false-result)))
+                          (if (and (not (eq? true-type 'RUNTIME))
+                                   (not (eq? false-type 'RUNTIME))
+                                   (not (eq? true-type false-type)))
+                              (warning-result
+                               (string-append "Warning: Type mismatch in if branches: "
+                                              (format-type true-type) " and "
+                                              (format-type false-type)))
+                              (finish (if (eq? true-type false-type)
+                                          true-type
+                                          'RUNTIME)))))))))))
+     ((eq? kind 'AST_COND)
+      (let ((conditions (vector-ref expr 1)))
+        (if (or (null? conditions)
+                (not (eq? (vector-ref (vector-ref (car (reverse conditions)) 1) 0)
+                          'AST_BOOL_TRUE)))
+            (warning-result "Warning: cond does not have a final #t case")
+            (let loop ((rest conditions) (first-type #f) (index 0))
+              (if (null? rest)
+                  (finish (if first-type first-type 'RUNTIME))
+                  (let* ((condition-node (car rest))
+                         (test-result (check-child (vector-ref condition-node 1))))
+                    (if (cdr test-result)
+                        test-result
+                        (let ((branch-result
+                               (typecheck-sequence (vector-ref condition-node 2) env)))
+                          (if (cdr branch-result)
+                              branch-result
+                              (let ((branch-type (car branch-result)))
+                                (if (and (> index 0)
+                                         (not (eq? first-type 'RUNTIME))
+                                         (not (eq? branch-type 'RUNTIME))
+                                         (not (eq? first-type branch-type)))
+                                    (warning-result
+                                     (string-append "Warning: Type mismatch in cond branches: "
+                                                    (format-type first-type) " and "
+                                                    (format-type branch-type)))
+                                    ;; The cond's type is always the first branch.
+                                    ;; Later RUNTIME branches do not widen it.
+                                    (loop (cdr rest)
+                                          (if (= index 0) branch-type first-type)
+                                          (+ index 1)))))))))))))
+     ((eq? kind 'AST_DEFINE_VAR)
+      (let ((result (check-child (vector-ref expr 2))))
+        (if (cdr result)
+            result
+            (begin
+              (ast-set-type! (vector-ref expr 1) (car result))
+              (type-env-put! env (vector-ref (vector-ref expr 1) 1) (car result))
+              (finish (car result))))))
+     ((eq? kind 'AST_DEFINE_FUNC)
+      (let* ((ids (vector-ref expr 1))
+             (body (vector-ref expr 2)))
+        (if (null? ids)
+            (let ((result (typecheck-sequence body env)))
+              (if (cdr result) result (finish 'LAMBDA)))
+            (begin
+              (ast-set-type! (car ids) 'LAMBDA)
+              (type-env-put! env (vector-ref (car ids) 1) 'LAMBDA)
+              (let ((result (typecheck-lambda-body (cdr ids) body '() env)))
+                (if (cdr result) result (finish 'LAMBDA)))))))
+     ((eq? kind 'AST_LAMBDA_DEF)
+      (let ((result (typecheck-lambda-body (vector-ref expr 1) (vector-ref expr 2) '() env)))
+        (if (cdr result) result (finish 'LAMBDA))))
+     ((eq? kind 'AST_SET)
+      (let ((result (check-child (vector-ref expr 2))))
+        (if (cdr result)
+            result
+            (begin
+              (ast-set-type! (vector-ref expr 1) 'RUNTIME)
+              (finish (car result))))))
+     ((eq? kind 'AST_LET)
+      (let ((bindings (vector-ref expr 1)))
+        (let check-bindings ((rest bindings) (types '()))
+          (if (null? rest)
+              (let ((local (type-env-push env)))
+                (let bind ((vars bindings) (value-types (reverse types)))
+                  (if (not (null? vars))
+                      (begin
+                        (ast-set-type! (vector-ref (car vars) 1) (car value-types))
+                        (type-env-put! local
+                                       (vector-ref (vector-ref (car vars) 1) 1)
+                                       (car value-types))
+                        (bind (cdr vars) (cdr value-types)))))
+                (let ((body-result (typecheck-sequence (vector-ref expr 2) local)))
+                  (if (cdr body-result) body-result (finish (car body-result)))))
+              (let ((value-result (check-child (vector-ref (car rest) 2))))
+                (if (cdr value-result)
+                    value-result
+                    (begin
+                      (ast-set-type! (vector-ref (car rest) 1) (car value-result))
+                      (check-bindings (cdr rest) (cons (car value-result) types)))))))))
+     ((eq? kind 'AST_APPLY)
+      (let ((function-result (check-child (vector-ref expr 1))))
+        (if (cdr function-result)
+            function-result
+            (let ((args-result (check-child (vector-ref expr 2))))
+              (if (cdr args-result)
+                  args-result
+                  (if (not (memq (car args-result) '(CONS RUNTIME)))
+                      (warning-result
+                       (string-append "Warning: Apply expects a list of arguments, found "
+                                      (format-type (car args-result))))
+                      (finish 'RUNTIME)))))))
+     ((eq? kind 'AST_CALL)
+      (if (null? (vector-ref expr 1))
+          (finish 'RUNTIME)
+          (let ((result (typecheck-call expr env)))
+            (if (cdr result) result (finish (car result))))))
+     (else (finish 'RUNTIME)))))
