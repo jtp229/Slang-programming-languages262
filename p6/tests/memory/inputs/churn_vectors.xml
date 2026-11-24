@@ -1,0 +1,129 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="fill"/>
+   <Identifier val="v"/>
+   <Identifier val="i"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="i"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="v"/>
+    <Begin>
+     <Call>
+      <Identifier val="vector-set!"/>
+      <Identifier val="v"/>
+      <Call>
+       <Identifier val="-"/>
+       <Identifier val="i"/>
+       <Int val="1"/>
+      </Call>
+      <Call>
+       <Identifier val="list"/>
+       <Identifier val="i"/>
+       <Identifier val="i"/>
+       <Identifier val="i"/>
+      </Call>
+     </Call>
+     <Call>
+      <Identifier val="fill"/>
+      <Identifier val="v"/>
+      <Call>
+       <Identifier val="-"/>
+       <Identifier val="i"/>
+       <Int val="1"/>
+      </Call>
+     </Call>
+    </Begin>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="churn"/>
+   <Identifier val="k"/>
+   <Identifier val="total"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="k"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="total"/>
+    <Call>
+     <Identifier val="churn"/>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="k"/>
+      <Int val="1"/>
+     </Call>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="total"/>
+      <Call>
+       <Identifier val="vector-length"/>
+       <Call>
+        <Identifier val="fill"/>
+        <Call>
+         <Identifier val="vector"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+         <Int val="0"/>
+        </Call>
+        <Int val="10"/>
+       </Call>
+      </Call>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="outer"/>
+   <Identifier val="j"/>
+   <Identifier val="total"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="j"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="total"/>
+    <Call>
+     <Identifier val="outer"/>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="j"/>
+      <Int val="1"/>
+     </Call>
+     <Call>
+      <Identifier val="churn"/>
+      <Int val="1000"/>
+      <Identifier val="total"/>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="outer"/>
+  <Int val="30"/>
+  <Int val="0"/>
+ </Call>
+</Ast>

@@ -1,0 +1,112 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="ring"/>
+   <Identifier val="n"/>
+  </Identifiers>
+  <Expressions>
+   <Let>
+    <Bindings>
+     <Binding>
+      <Identifier val="first"/>
+      <Call>
+       <Identifier val="cons"/>
+       <Identifier val="n"/>
+       <Empty/>
+      </Call>
+     </Binding>
+    </Bindings>
+    <Actions>
+     <Call>
+      <Identifier val="set-cdr!"/>
+      <Identifier val="first"/>
+      <Call>
+       <Identifier val="cons"/>
+       <Call>
+        <Identifier val="+"/>
+        <Identifier val="n"/>
+        <Int val="1"/>
+       </Call>
+       <Identifier val="first"/>
+      </Call>
+     </Call>
+     <Identifier val="first"/>
+    </Actions>
+   </Let>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="churn"/>
+   <Identifier val="k"/>
+   <Identifier val="total"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="k"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="total"/>
+    <Call>
+     <Identifier val="churn"/>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="k"/>
+      <Int val="1"/>
+     </Call>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="total"/>
+      <Call>
+       <Identifier val="car"/>
+       <Call>
+        <Identifier val="cdr"/>
+        <Call>
+         <Identifier val="ring"/>
+         <Identifier val="k"/>
+        </Call>
+       </Call>
+      </Call>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="outer"/>
+   <Identifier val="j"/>
+   <Identifier val="total"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="j"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="total"/>
+    <Call>
+     <Identifier val="outer"/>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="j"/>
+      <Int val="1"/>
+     </Call>
+     <Call>
+      <Identifier val="churn"/>
+      <Int val="1000"/>
+      <Identifier val="total"/>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="outer"/>
+  <Int val="150"/>
+  <Int val="0"/>
+ </Call>
+</Ast>

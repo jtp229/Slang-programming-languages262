@@ -1,0 +1,36 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="l"/>
+  <Cons>
+   <Int val="1"/>
+   <Cons>
+    <Int val="2"/>
+    <Cons>
+     <Int val="3"/>
+     <Empty/>
+    </Cons>
+   </Cons>
+  </Cons>
+ </DefineVar>
+ <Call>
+  <Identifier val="set-cdr!"/>
+  <Identifier val="l"/>
+  <Cons>
+   <Int val="4"/>
+   <Cons>
+    <Int val="5"/>
+    <Cons>
+     <Int val="6"/>
+     <Cons>
+      <Int val="7"/>
+      <Cons>
+       <Int val="8"/>
+       <Empty/>
+      </Cons>
+     </Cons>
+    </Cons>
+   </Cons>
+  </Cons>
+ </Call>
+ <Identifier val="l"/>
+</Ast>

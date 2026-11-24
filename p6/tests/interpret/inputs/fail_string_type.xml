@@ -1,0 +1,7 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="string-append"/>
+  <Str val="hello "/>
+  <Symbol val="world"/>
+ </Call>
+</Ast>

@@ -1,0 +1,32 @@
+<Ast xmlns="ast">
+ <Call>
+  <Let>
+   <Bindings>
+    <Binding>
+     <Identifier val="x"/>
+     <Int val="10"/>
+    </Binding>
+    <Binding>
+     <Identifier val="y"/>
+     <Int val="20"/>
+    </Binding>
+   </Bindings>
+   <Actions>
+    <Lambda>
+     <Formals>
+      <Identifier val="z"/>
+     </Formals>
+     <Expressions>
+      <Call>
+       <Identifier val="+"/>
+       <Identifier val="x"/>
+       <Identifier val="y"/>
+       <Identifier val="z"/>
+      </Call>
+     </Expressions>
+    </Lambda>
+   </Actions>
+  </Let>
+  <Int val="10"/>
+ </Call>
+</Ast>

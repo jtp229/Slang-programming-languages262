@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="square_int"/>
+  <Int val="5"/>
+ </Call>
+</Ast>

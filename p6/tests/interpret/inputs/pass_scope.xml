@@ -1,0 +1,59 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="scopey"/>
+  <Lambda>
+   <Formals>
+    <Identifier val="x"/>
+   </Formals>
+   <Expressions>
+    <Let>
+     <Bindings>
+      <Binding>
+       <Identifier val="y"/>
+       <Identifier val="x"/>
+      </Binding>
+     </Bindings>
+     <Actions>
+      <Lambda>
+       <Formals>
+        <Identifier val="z"/>
+       </Formals>
+       <Expressions>
+        <Begin>
+         <Set>
+          <Identifier val="y"/>
+          <Call>
+           <Identifier val="+"/>
+           <Identifier val="y"/>
+           <Identifier val="z"/>
+          </Call>
+         </Set>
+         <Identifier val="y"/>
+        </Begin>
+       </Expressions>
+      </Lambda>
+     </Actions>
+    </Let>
+   </Expressions>
+  </Lambda>
+ </DefineVar>
+ <DefineVar>
+  <Identifier val="jo"/>
+  <Call>
+   <Identifier val="scopey"/>
+   <Int val="10"/>
+  </Call>
+ </DefineVar>
+ <Call>
+  <Identifier val="jo"/>
+  <Int val="10"/>
+ </Call>
+ <Call>
+  <Identifier val="jo"/>
+  <Int val="10"/>
+ </Call>
+ <Call>
+  <Identifier val="jo"/>
+  <Int val="10"/>
+ </Call>
+</Ast>

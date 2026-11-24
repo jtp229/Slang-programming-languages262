@@ -1,0 +1,94 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="gcd"/>
+   <Identifier val="x"/>
+   <Identifier val="y"/>
+  </Identifiers>
+  <Expressions>
+   <Cond>
+    <Condition>
+     <Test>
+      <Call>
+       <Identifier val="="/>
+       <Identifier val="x"/>
+       <Int val="0"/>
+      </Call>
+     </Test>
+     <Actions>
+      <Int val="0"/>
+     </Actions>
+    </Condition>
+    <Condition>
+     <Test>
+      <Call>
+       <Identifier val="="/>
+       <Identifier val="y"/>
+       <Int val="0"/>
+      </Call>
+     </Test>
+     <Actions>
+      <Int val="0"/>
+     </Actions>
+    </Condition>
+    <Condition>
+     <Test>
+      <Call>
+       <Identifier val="="/>
+       <Identifier val="x"/>
+       <Identifier val="y"/>
+      </Call>
+     </Test>
+     <Actions>
+      <Identifier val="x"/>
+     </Actions>
+    </Condition>
+    <Condition>
+     <Test>
+      <Call>
+       <Identifier val="&gt;"/>
+       <Identifier val="x"/>
+       <Identifier val="y"/>
+      </Call>
+     </Test>
+     <Actions>
+      <Call>
+       <Identifier val="gcd"/>
+       <Call>
+        <Identifier val="-"/>
+        <Identifier val="x"/>
+        <Identifier val="y"/>
+       </Call>
+       <Identifier val="y"/>
+      </Call>
+     </Actions>
+    </Condition>
+    <Condition>
+     <Test>
+      <Call>
+       <Identifier val="&gt;"/>
+       <Identifier val="y"/>
+       <Identifier val="x"/>
+      </Call>
+     </Test>
+     <Actions>
+      <Call>
+       <Identifier val="gcd"/>
+       <Identifier val="x"/>
+       <Call>
+        <Identifier val="-"/>
+        <Identifier val="y"/>
+        <Identifier val="x"/>
+       </Call>
+      </Call>
+     </Actions>
+    </Condition>
+   </Cond>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="gcd"/>
+  <Int val="30"/>
+  <Int val="27"/>
+ </Call>
+</Ast>

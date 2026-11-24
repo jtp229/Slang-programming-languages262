@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Dbl val="3.5"/>
+ </Call>
+</Ast>

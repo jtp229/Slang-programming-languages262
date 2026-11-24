@@ -1,0 +1,21 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="trueish"/>
+  <Lambda>
+   <Formals>
+    <Identifier val="x"/>
+   </Formals>
+   <Expressions>
+    <If>
+     <Identifier val="x"/>
+     <Bool val="true"/>
+     <Bool val="false"/>
+    </If>
+   </Expressions>
+  </Lambda>
+ </DefineVar>
+ <Call>
+  <Identifier val="trueish"/>
+  <Empty/>
+ </Call>
+</Ast>

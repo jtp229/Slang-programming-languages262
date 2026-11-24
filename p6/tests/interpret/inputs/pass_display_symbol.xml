@@ -1,0 +1,6 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="display"/>
+  <Symbol val="sym"/>
+ </Call>
+</Ast>

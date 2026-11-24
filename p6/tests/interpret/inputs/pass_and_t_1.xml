@@ -1,0 +1,5 @@
+<Ast xmlns="ast">
+ <And>
+  <Int val="1"/>
+ </And>
+</Ast>

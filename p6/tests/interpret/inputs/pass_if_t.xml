@@ -1,0 +1,7 @@
+<Ast xmlns="ast">
+ <If>
+  <Bool val="true"/>
+  <Int val="1"/>
+  <Int val="2"/>
+ </If>
+</Ast>

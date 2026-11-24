@@ -1,0 +1,104 @@
+<Ast xmlns="ast">
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="grow"/>
+   <Identifier val="s"/>
+   <Identifier val="n"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="n"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="s"/>
+    <Call>
+     <Identifier val="grow"/>
+     <Call>
+      <Identifier val="string-append"/>
+      <Identifier val="s"/>
+      <Str val="abcdefghij"/>
+     </Call>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="n"/>
+      <Int val="1"/>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="churn"/>
+   <Identifier val="k"/>
+   <Identifier val="total"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="k"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="total"/>
+    <Call>
+     <Identifier val="churn"/>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="k"/>
+      <Int val="1"/>
+     </Call>
+     <Call>
+      <Identifier val="+"/>
+      <Identifier val="total"/>
+      <Call>
+       <Identifier val="string-length"/>
+       <Call>
+        <Identifier val="grow"/>
+        <Str val=""/>
+        <Int val="100"/>
+       </Call>
+      </Call>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <DefineFunc>
+  <Identifiers>
+   <Identifier val="outer"/>
+   <Identifier val="j"/>
+   <Identifier val="total"/>
+  </Identifiers>
+  <Expressions>
+   <If>
+    <Call>
+     <Identifier val="="/>
+     <Identifier val="j"/>
+     <Int val="0"/>
+    </Call>
+    <Identifier val="total"/>
+    <Call>
+     <Identifier val="outer"/>
+     <Call>
+      <Identifier val="-"/>
+      <Identifier val="j"/>
+      <Int val="1"/>
+     </Call>
+     <Call>
+      <Identifier val="churn"/>
+      <Int val="200"/>
+      <Identifier val="total"/>
+     </Call>
+    </Call>
+   </If>
+  </Expressions>
+ </DefineFunc>
+ <Call>
+  <Identifier val="outer"/>
+  <Int val="20"/>
+  <Int val="0"/>
+ </Call>
+</Ast>

@@ -1,0 +1,55 @@
+<Ast xmlns="ast">
+ <DefineVar>
+  <Identifier val="both-true"/>
+  <Lambda>
+   <Formals>
+    <Identifier val="x"/>
+    <Identifier val="y"/>
+   </Formals>
+   <Expressions>
+    <Cond>
+     <Condition>
+      <Test>
+       <And>
+        <Identifier val="x"/>
+        <Identifier val="y"/>
+       </And>
+      </Test>
+      <Actions>
+       <Symbol val="both"/>
+      </Actions>
+     </Condition>
+     <Condition>
+      <Test>
+       <Identifier val="x"/>
+      </Test>
+      <Actions>
+       <Symbol val="justx"/>
+      </Actions>
+     </Condition>
+     <Condition>
+      <Test>
+       <Identifier val="y"/>
+      </Test>
+      <Actions>
+       <Symbol val="justy"/>
+      </Actions>
+     </Condition>
+     <Condition>
+      <Test>
+       <Bool val="true"/>
+      </Test>
+      <Actions>
+       <Bool val="false"/>
+      </Actions>
+     </Condition>
+    </Cond>
+   </Expressions>
+  </Lambda>
+ </DefineVar>
+ <Call>
+  <Identifier val="both-true"/>
+  <Bool val="false"/>
+  <Int val="1"/>
+ </Call>
+</Ast>

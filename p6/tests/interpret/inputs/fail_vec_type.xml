@@ -1,0 +1,7 @@
+<Ast xmlns="ast">
+ <Call>
+  <Identifier val="vector-get"/>
+  <Str val="hi"/>
+  <Int val="1"/>
+ </Call>
+</Ast>

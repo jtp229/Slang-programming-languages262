@@ -1,0 +1,7 @@
+<Ast xmlns="ast">
+ <Or>
+  <Int val="1"/>
+  <Int val="2"/>
+  <Int val="3"/>
+ </Or>
+</Ast>
